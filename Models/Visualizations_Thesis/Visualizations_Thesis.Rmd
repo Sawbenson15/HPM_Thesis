@@ -1,0 +1,95 @@
+---
+title: "Visualizations"
+output: html_notebook
+---
+
+**Note**
+
+* Use 
+   + library(ggplot2)
+   + library(GGally)
+
+
+Data
+```{r}
+# Reading in Packages
+library(ggplot2) # Graphs
+library(gridExtra) # Organize graphs
+library(dplyr) # Data wrangling
+library(tidyr) # Data wrangling
+library(tinytex) #for RMarkdown
+library(readxl)
+
+
+data_bi_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Models/Data/data_bi_clean_26.12.21.xlsx")
+```
+
+#### ggplot2 Visualizations
+
+
+Price Analysis
+```{r}
+
+p <- ggplot(data_bi_clean, aes(y = sold_price, x = property_type, fill = property_type )) 
+ 
+p +  geom_boxplot() +
+     theme_bw() 
+    
+# Re-order items
+p + geom_boxplot() +
+    theme_bw() +
+    scale_x_discrete(limits=c("CND", "DUP", "TNH", "SGL", "PAT", "OTH")) 
+
+
+
+
+ggplot(data = data_bi_clean) + 
+   geom_point(mapping = aes(x = living_area, y = sold_price, color = corona_crisis))
+
+ggplot(data = data_bi_clean) + 
+  geom_point(mapping = aes(y = sold_price, living_area )) + 
+  facet_wrap(corona_crisis ~ property_type, nrow = 2)
+
+ggplot(data = data_bi_clean) + 
+  geom_bar(mapping = aes(x = property_type, fill = condition))
+
+ggplot(data = data_bi_clean) + 
+  geom_bar(mapping = aes(x = condition)) 
+
+# Ordered and "Other" is removed
+ggplot(data = data_bi_clean) + 
+  geom_bar(mapping = aes(x = condition)) +
+  scale_x_discrete(limits=c("avg", "Excellent", "fair", "New", "Poor", "Vrgd")) 
+
+data_bi_clean$post_corona_bi <- as.factor(data_bi_clean$post_corona_bi)
+
+ggplot(data_bi_clean, aes(y = sold_price, living_area)) + 
+geom_smooth(aes(colour = factor(post_corona_bi)))
+
+ggplot(data_bi_clean, aes(y = sold_price, days_on_market)) + 
+geom_smooth()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

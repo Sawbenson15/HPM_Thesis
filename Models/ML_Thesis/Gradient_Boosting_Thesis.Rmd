@@ -1,0 +1,590 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+**Todos**
+
+* Use raw data set
+* Transform to to log(sold_price)? 
+
+
+### 1 Load packages
+```{r include=FALSE}
+library(rsample)      # data splitting 
+library(gbm)          # basic implementation
+library(xgboost)      # a faster implementation of gbm
+library(caret)        # an aggregator package for performing many machine learning models
+library(h2o)          # a java-based platform
+library(pdp)          # model visualization
+library(ggplot2)      # model visualization
+library(lime)         # model visualization
+```
+
+### 2 Read in Data
+```{r}
+# Read in data
+library(readxl)
+data_gbm_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/3. data_factor_cleaned.xlsx")
+
+
+# Convert Char to Factors with N Levels
+# Structure Change
+data_gbm_clean$property_type <- as.factor(data_gbm_clean$property_type)
+data_gbm_clean$ac_type <- as.factor(data_gbm_clean$ac_type)
+data_gbm_clean$patio <- as.factor(data_gbm_clean$patio)
+data_gbm_clean$school_general <- as.factor(data_gbm_clean$school_general)
+data_gbm_clean$pool <- as.factor(data_gbm_clean$pool)
+data_gbm_clean$roof_type <- as.factor(data_gbm_clean$roof_type)
+data_gbm_clean$gas_type <- as.factor(data_gbm_clean$gas_type)
+data_gbm_clean$out_building <- as.factor(data_gbm_clean$out_building)
+data_gbm_clean$appliances <- as.factor(data_gbm_clean$appliances)
+data_gbm_clean$garage <- as.factor(data_gbm_clean$garage)
+data_gbm_clean$property_condition <- as.factor(data_gbm_clean$property_condition)
+data_gbm_clean$energy_efficient <- as.factor(data_gbm_clean$energy_efficient)
+data_gbm_clean$exterior_type <- as.factor(data_gbm_clean$exterior_type)
+data_gbm_clean$exterior_features <- as.factor(data_gbm_clean$exterior_features)
+data_gbm_clean$fireplace <- as.factor(data_gbm_clean$fireplace)
+data_gbm_clean$foundation_type <- as.factor(data_gbm_clean$foundation_type)
+data_gbm_clean$beds_total <- as.factor(data_gbm_clean$beds_total)
+data_gbm_clean$bath_full <- as.factor(data_gbm_clean$bath_full)
+data_gbm_clean$bath_half <- as.factor(data_gbm_clean$bath_half)
+data_gbm_clean$sewer_type <- as.factor(data_gbm_clean$sewer_type)
+data_gbm_clean$property_style <- as.factor(data_gbm_clean$property_style)
+data_gbm_clean$subdivision <- as.factor(data_gbm_clean$subdivision)
+data_gbm_clean$water_type <- as.factor(data_gbm_clean$water_type)
+data_gbm_clean$waterfront <- as.factor(data_gbm_clean$waterfront)
+data_gbm_clean$sold_date <- openxlsx::convertToDate(data_gbm_clean$sold_date)
+data_gbm_clean$sold_date <- as.numeric(data_gbm_clean$sold_date)
+
+str(data_gbm_clean)
+
+# Splits
+data_gbm_clean$city_limits <- as.factor(data_gbm_clean$city_limits)
+data_gbm_clean$corona_date_split <- as.factor(data_gbm_clean$corona_date_split)
+data_gbm_clean$top25_sold_price <- as.factor(data_gbm_clean$top25_sold_price)
+data_gbm_clean$bottom25_sold_price <- as.factor(data_gbm_clean$bottom25_sold_price)
+data_gbm_clean$top25_area_living <- as.factor(data_gbm_clean$top25_area_living)
+data_gbm_clean$bottom25_area_living  <- as.factor(data_gbm_clean$bottom25_area_living)
+data_gbm_clean$top25_age <- as.factor(data_gbm_clean$top25_age)
+data_gbm_clean$bottom25_age <- as.factor(data_gbm_clean$bottom25_age)
+data_gbm_clean$top25_dom <- as.factor(data_gbm_clean$top25_dom)
+data_gbm_clean$bottom25_dom <- as.factor(data_gbm_clean$bottom25_dom)
+data_gbm_clean$infections_period <- as.numeric(data_gbm_clean$infections_accum > 1000)
+data_gbm_clean$infections_period <- as.factor(data_gbm_clean$infections_period)
+
+str(data_gbm_clean)
+
+# Remove this weird '20' level is bath_full
+levels(data_gbm_clean$bath_full)
+is.na(data_gbm_clean$bath_full) <- data_gbm_clean$bath_full == "20"
+data_gbm_clean$bath_full <- factor(data_gbm_clean$bath_full)
+levels(data_gbm_clean$bath_full)
+
+# Remove beds_total > 5
+levels(data_gbm_clean$beds_total)
+is.na(data_gbm_clean$beds_total) <- data_gbm_clean$beds_total == "7" 
+data_gbm_clean$beds_total <- factor(data_gbm_clean$beds_total)
+is.na(data_gbm_clean$beds_total) <- data_gbm_clean$beds_total == "6" 
+data_gbm_clean$beds_total <- factor(data_gbm_clean$beds_total)
+levels(data_gbm_clean$beds_total)
+
+
+
+levels(data_gbm_clean$beds_total)
+levels(data_gbm_clean$bath_full)
+levels(data_gbm_clean$bath_half)
+
+# Non_linear Additions
+data_gbm_clean$age_2 <- I(data_gbm_clean$age^2)
+data_gbm_clean$area_living_2 <- I(data_gbm_clean$area_living^2)
+
+# Removals
+# - Area_total
+# - Listing price
+data_gbm_clean <- subset(data_gbm_clean, select = -c(area_total, list_price))
+
+```
+
+<br>
+
+### Split data
+```{r}
+# Create training (70%) and test (30%) sets for data.
+# Use set.seed for reproducibility
+set.seed(1)
+split <- initial_split(data_gbm_clean, prop = .7)
+train <- training(split)
+test  <- testing(split)
+```
+
+<br>
+
+### Structure Data: One-Hot Encoding
+```{r}
+# Structure Change
+# variable names
+features <- setdiff(names(train), "sold_price")
+features
+
+# Create the treatment plan from the training data
+treatplan <- vtreat::designTreatmentsZ(train, features, verbose = FALSE)
+
+# Get the "clean" variable names from the scoreFrame
+new_vars <- treatplan %>%
+  magrittr::use_series(scoreFrame) %>%        
+  dplyr::filter(code %in% c("clean", "lev")) %>% 
+  magrittr::use_series(varName)     
+
+# Prepare the training data
+features_train <- vtreat::prepare(treatplan, train, varRestriction = new_vars) %>% as.matrix()
+response_train <- train$sold_price
+
+# Prepare the test data
+features_test <- vtreat::prepare(treatplan, test, varRestriction = new_vars) %>% as.matrix()
+response_test <- test$sold_price
+
+# dimensions of one-hot encoded data
+dim(features_train)
+# [1] 17270 17346
+dim(features_test)
+# [1] 7402 17346
+
+```
+
+<br>
+
+### Model 1
+```{r}
+
+set.seed(2)
+start_time <- Sys.time()
+xgb.fit1 <- xgb.cv(
+  data = features_train,
+  label = response_train,
+  nrounds = 1000,
+  nfold = 5,
+  objective = "reg:linear",  # for regression models
+  verbose = 0               # silent,
+)
+end_time <- Sys.time()
+time_taken <- end_time - start_time
+time_taken
+
+# get number of trees that minimize error
+xgb.fit1$evaluation_log %>%
+  dplyr::summarise(
+    ntrees.train = which(train_rmse_mean == min(train_rmse_mean))[1],
+    rmse.train   = min(train_rmse_mean),
+    ntrees.test  = which(test_rmse_mean == min(test_rmse_mean))[1],
+    rmse.test   = min(test_rmse_mean),
+  )
+##   ntrees.train rmse.train ntrees.test rmse.test
+## 1          965  0.5022836          60  27572.31
+
+# plot error vs number trees
+ggplot(xgb.fit1$evaluation_log) +
+  geom_line(aes(iter, train_rmse_mean), color = "red") +
+  geom_line(aes(iter, test_rmse_mean), color = "blue")
+
+
+```
+
+<br>
+
+### Model 1 with Early Stoppage
+```{r}
+# reproducibility
+set.seed(3)
+
+start_time <- proc.time()
+xgb.fit2 <- xgb.cv(
+  data = features_train,
+  label = response_train,
+  nrounds = 1000,
+  nfold = 5,
+  objective = "reg:linear",  # for regression models
+  verbose = 0,               # silent,
+  early_stopping_rounds = 10 # stop if no improvement for 10 consecutive trees
+)
+end_time <- proc.time()
+time_taken <- end_time - start_time
+time_taken
+
+# get number of trees that minimize error
+xgb.fit2$evaluation_log %>%
+  dplyr::summarise(
+    ntrees.train = which(train_rmse_mean == min(train_rmse_mean))[1],
+    rmse.train   = min(train_rmse_mean),
+    ntrees.test  = which(test_rmse_mean == min(test_rmse_mean))[1],
+    rmse.test   = min(test_rmse_mean),
+  )
+
+# plot error vs number trees
+ggplot(xgb.fit2$evaluation_log) +
+  geom_line(aes(iter, train_rmse_mean), color = "red") +
+  geom_line(aes(iter, test_rmse_mean), color = "blue")
+```
+
+<br>
+
+### Adding Hyperparameters
+```{r}
+# create parameter list
+  params <- list(
+    eta = .1,
+    max_depth = 5,
+    min_child_weight = 2,
+    subsample = .8,
+    colsample_bytree = .9
+  )
+
+# reproducibility
+set.seed(123)
+
+# train model
+start_time <- Sys.time()
+xgb.fit3 <- xgb.cv(
+  params = params,
+  data = features_train,
+  label = response_train,
+  nrounds = 1000,
+  nfold = 5,
+  objective = "reg:linear",  # for regression models
+  verbose = 0,               # silent,
+  early_stopping_rounds = 10 # stop if no improvement for 10 consecutive trees
+)
+end_time <- Sys.time()
+time_taken <- end_time - start_time
+time_taken
+
+# assess results
+xgb.fit3$evaluation_log %>%
+  dplyr::summarise(
+    ntrees.train = which(train_rmse_mean == min(train_rmse_mean))[1],
+    rmse.train   = min(train_rmse_mean),
+    ntrees.test  = which(test_rmse_mean == min(test_rmse_mean))[1],
+    rmse.test   = min(test_rmse_mean),
+  )
+##   ntrees.train rmse.train ntrees.test rmse.test
+## 1          180   5891.703         170  24650.17
+```
+
+<br>
+
+### Tuning Hyperparameters
+```{r}
+# create hyperparameter grid
+hyper_grid <- expand.grid(
+  eta = c(.01, .05, .1, .3),
+  max_depth = c(1, 3, 5, 7),
+  min_child_weight = c(1, 3, 5, 7),
+  subsample = c(.65, .8, 1), 
+  colsample_bytree = c(.8, .9, 1),
+  optimal_trees = 0,               # a place to dump results
+  min_RMSE = 0                     # a place to dump results
+)
+
+nrow(hyper_grid)
+## [1] 576
+
+## Warning: Expect many hours of waiting (like 8+)
+
+# Grid search 
+start_time <- Sys.time()
+for(i in 1:nrow(hyper_grid)) {
+  
+  # create parameter list
+  params <- list(
+    eta = hyper_grid$eta[i],
+    max_depth = hyper_grid$max_depth[i],
+    min_child_weight = hyper_grid$min_child_weight[i],
+    subsample = hyper_grid$subsample[i],
+    colsample_bytree = hyper_grid$colsample_bytree[i]
+  )
+  
+  # reproducibility
+  set.seed(123)
+  
+  # train model
+  xgb.tune <- xgb.cv(
+    params = params,
+    data = features_train,
+    label = response_train,
+    nrounds = 5000,
+    nfold = 5,
+    objective = "reg:linear",  # for regression models
+    verbose = 0,               # silent,
+    early_stopping_rounds = 10 # stop if no improvement for 10 consecutive trees
+  )
+  
+  # add min training error and trees to grid
+  hyper_grid$optimal_trees[i] <- which.min(xgb.tune$evaluation_log$test_rmse_mean)
+  hyper_grid$min_RMSE[i] <- min(xgb.tune$evaluation_log$test_rmse_mean)
+}
+end_time <- Sys.time()
+time_taken <- end_time - start_time
+time_take
+
+hyper_grid %>%
+  dplyr::arrange(min_RMSE) %>%
+  head(10)
+
+
+##     eta max_depth min_child_weight subsample colsample_bytree optimal_trees min_RMSE
+## 1  0.01         5                5      0.65                1          1576 23548.84
+## 2  0.01         5                3      0.80                1          1626 23587.16
+## 3  0.01         5                3      0.65                1          1451 23602.96
+## 4  0.01         5                1      0.65                1          1480 23608.65
+## 5  0.05         5                3      0.65                1           305 23743.54
+## 6  0.01         5                1      0.80                1          1851 23772.90
+## 7  0.05         3                3      0.65                1           552 23783.55
+## 8  0.01         7                5      0.65                1          1248 23792.65
+## 9  0.01         3                3      0.80                1          1923 23794.78
+## 10 0.01         7                1      0.65                1          1070 23800.80
+
+```
+
+<br>
+
+### Train Final Model
+```{r}
+# parameter list
+params <- list(
+  eta = 0.01,
+  max_depth = 5,
+  min_child_weight = 5,
+  subsample = 0.65,
+  colsample_bytree = 1
+)
+
+# train final model
+start_time <- Sys.time()
+xgb.fit.final <- xgboost(
+  params = params,
+  data = features_train,
+  label = response_train,
+  nrounds = 1576,
+  objective = "reg:linear",
+  verbose = 0
+)
+end_time <- Sys.time()
+time_taken <- end_time - start_time
+time_taken
+```
+
+
+
+
+<br><br><br><br>
+
+### Start of Old Code
+Run Model
+```{r}
+# for reproducibility
+set.seed(2)
+
+# train GBM model
+gbm.fit <- gbm(
+  formula = log(sold_price) ~ . - post_corona_bi,
+  distribution = "gaussian",
+  data = train,
+  n.trees = 10000,
+  interaction.depth = 1,
+  shrinkage = 0.001,
+  cv.folds = 5,
+  n.cores = NULL, # will use all cores by default
+  verbose = FALSE
+  )  
+
+# print results
+print(gbm.fit)
+## gbm(formula = Sale_Price ~ ., distribution = "gaussian", data = ames_train, 
+##     n.trees = 10000, interaction.depth = 1, shrinkage = 0.001, 
+##     cv.folds = 5, verbose = FALSE, n.cores = NULL)
+## A gradient boosted model with gaussian loss function.
+## 10000 iterations were performed.
+## The best cross-validation iteration was 10000.
+## There were 80 predictors of which 45 had non-zero influence.
+```
+
+Retrieve min MSE and plot MSE 
+```{r}
+# get cv MSE and compute RMSE
+sqrt(min(gbm.fit$cv.error))
+# [1] 56443.88
+
+# JUST squared error
+min(gbm.fit$cv.error)
+
+# get train MSE and compute RMSE
+sqrt(min(gbm.fit$train.error))
+
+
+# plot loss function as a result of n trees added to the ensemble
+gbm.perf(gbm.fit, method = "cv")
+
+?gbm.perf()
+?gbm.fit
+
+```
+
+Tuning a bit
+```{r}
+# for reproducibility
+set.seed(3)
+
+# train GBM model
+gbm.fit2 <- gbm(
+  formula = sold_price ~ .,
+  distribution = "gaussian",
+  data = train,
+  n.trees = 5000,
+  interaction.depth = 3,
+  shrinkage = 0.1,
+  cv.folds = 5,
+  n.cores = NULL, # will use all cores by default
+  verbose = FALSE
+  )
+```
+
+
+```{r}
+# find index for n trees with minimum CV error
+min_MSE <- which.min(gbm.fit2$cv.error)
+
+# get MSE and compute RMSE
+sqrt(gbm.fit2$cv.error[min_MSE])
+## [1] 49381.62
+## [2] 48708.48
+
+
+# plot loss function as a result of n trees added to the ensemble
+gbm.perf(gbm.fit2, method = "cv")
+```
+Create Hyper Grid
+```{r}
+# create hyper-parameter grid
+hyper_grid <- expand.grid(
+  shrinkage = c(.01, .1, .3),
+  interaction.depth = c(1, 3, 5),
+  n.minobsinnode = c(5, 10, 15),
+  bag.fraction = c(.65, .8, 1), 
+  optimal_trees = 0,               # a place to dump results
+  min_RMSE = 0                     # a place to dump results
+)
+
+# total number of combinations
+nrow(hyper_grid)
+## [1] 81
+```
+
+Run total-search model
+```{r}
+# randomize data
+random_index <- sample(1:nrow(train), nrow(train))
+random_train <- train[random_index, ]
+
+# grid search 
+for(i in 1:nrow(hyper_grid)) {
+  
+  # reproducibility
+  set.seed(4)
+  
+  # train model
+  gbm.tune <- gbm(
+    formula = sold_price ~ .,
+    distribution = "gaussian",
+    data = random_train,
+    n.trees = 5000,
+    interaction.depth = hyper_grid$interaction.depth[i],
+    shrinkage = hyper_grid$shrinkage[i],
+    n.minobsinnode = hyper_grid$n.minobsinnode[i],
+    bag.fraction = hyper_grid$bag.fraction[i],
+    train.fraction = .75,
+    n.cores = NULL, # will use all cores by default
+    verbose = FALSE
+  )
+  
+  # add min training error and trees to grid
+  hyper_grid$optimal_trees[i] <- which.min(gbm.tune$valid.error)
+  hyper_grid$min_RMSE[i] <- sqrt(min(gbm.tune$valid.error))
+}
+
+hyper_grid %>% 
+  dplyr::arrange(min_RMSE) %>%
+  head(10)
+
+# [1] 47544.40
+# [2] 46114.11
+```
+Visualizations
+```{r}
+par(mar = c(5, 8, 1, 1))
+summary(
+  gbm.tune, 
+  cBars = 10,
+  method = relative.influence, # also can use permutation.test.gbm
+  las = 2
+  )
+
+# Machine learning narrative is in support of the OLS findings 
+
+```
+
+```{r}
+
+install.packages("devtools")
+library(devtools) # To use ggplot2 for gbm package
+
+vip::vip(gbm.tune)
+```
+
+Partial dependence plots
+
+```{r}
+#Living area
+gbm.tune %>%
+  partial(pred.var = "days_on_market", n.trees = gbm.tune$n.trees, grid.resolution = 100) %>%
+  autoplot(rug = TRUE, train = train) +
+  scale_y_continuous(labels = scales::dollar)
+
+# Days on market
+gbm.tune %>%
+  partial(pred.var = "days_on_market", n.trees = gbm.tune$n.trees, grid.resolution = 100) %>%
+  autoplot(rug = TRUE, train = train) +
+  scale_y_continuous(labels = scales::dollar)
+```
+
+ICE Curves
+
+
+
+
+Predicting
+```{r}
+# predict values for test data
+pred <- predict(gbm.tune, n.trees = gbm.tune$n.trees, test)
+
+# results
+caret::RMSE(pred, test$sold_price)
+# [1] 54097.59
+```
+
+
+xgboost
+The xgboost R package provides an R API to “Extreme Gradient Boosting”, which is an efficient implementation of gradient boosting framework **(apprx 10x faster than gbm)**. The xgboost/demo repository provides a wealth of information. You can also find a fairly comprehensive parameter tuning guide here. The xgboost package has been quite popular and successful on Kaggle for data mining competitions.
+
+Features include:
+
+* Provides built-in k-fold cross-validation
+* Stochastic GBM with column and row sampling (per split and per tree) for better generalization.
+* Includes efficient linear model solver and tree learning algorithms.
+* Parallel computation on a single machine.
+* Supports various objective functions, including regression, classification and ranking.
+* The package is made to be extensible, so that users are also allowed to define their own objectives easily.
+* Apache 2.0 License.
+
+
+
+

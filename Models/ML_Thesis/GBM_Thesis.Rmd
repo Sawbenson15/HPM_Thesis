@@ -1,0 +1,758 @@
+---
+title: "Hedonic Pricing Models with Machine Learning"
+output:
+  html_notebook: default
+  pdf_document: default
+code_folding: hide
+Author: Sawyer Benson
+---
+
+
+Start of Code
+
+Load packages
+```{r include=FALSE}
+library(rsample)      # data splitting
+library(gbm)          # basic implementation
+library(xgboost)      # a faster implementation of gbm
+library(caret)        # an aggregator package for performing many machine learning models
+library(h2o)          # a java-based platform
+library(pdp)          # model visualization
+library(ggplot2)      # model visualization
+library(lime)         # model visualization
+library(doParallel)   # Parallel computing to reduce model run time 
+library(plotly)       # For 3D plotting in ggplot2
+
+```
+
+Read in Data
+```{r}
+# Read in data
+library(readxl)
+data_gbm_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/3. data_factor_cleaned.xlsx")
+
+# Structure Change
+data_gbm_clean$property_type <- as.factor(data_gbm_clean$property_type)
+data_gbm_clean$ac_type <- as.factor(data_gbm_clean$ac_type)
+data_gbm_clean$patio <- as.factor(data_gbm_clean$patio)
+data_gbm_clean$school_general <- as.factor(data_gbm_clean$school_general)
+data_gbm_clean$pool <- as.factor(data_gbm_clean$pool)
+data_gbm_clean$roof_type <- as.factor(data_gbm_clean$roof_type)
+data_gbm_clean$gas_type <- as.factor(data_gbm_clean$gas_type)
+data_gbm_clean$out_building <- as.factor(data_gbm_clean$out_building)
+data_gbm_clean$appliances <- as.factor(data_gbm_clean$appliances)
+data_gbm_clean$garage <- as.factor(data_gbm_clean$garage)
+data_gbm_clean$property_condition <- as.factor(data_gbm_clean$property_condition)
+data_gbm_clean$energy_efficient <- as.factor(data_gbm_clean$energy_efficient)
+data_gbm_clean$exterior_type <- as.factor(data_gbm_clean$exterior_type)
+data_gbm_clean$exterior_features <- as.factor(data_gbm_clean$exterior_features)
+data_gbm_clean$fireplace <- as.factor(data_gbm_clean$fireplace)
+data_gbm_clean$foundation_type <- as.factor(data_gbm_clean$foundation_type)
+data_gbm_clean$beds_total <- as.factor(data_gbm_clean$beds_total)
+data_gbm_clean$bath_full <- as.factor(data_gbm_clean$bath_full)
+data_gbm_clean$bath_half <- as.factor(data_gbm_clean$bath_half)
+data_gbm_clean$sewer_type <- as.factor(data_gbm_clean$sewer_type)
+data_gbm_clean$property_style <- as.factor(data_gbm_clean$property_style)
+data_gbm_clean$subdivision <- as.factor(data_gbm_clean$subdivision)
+data_gbm_clean$water_type <- as.factor(data_gbm_clean$water_type)
+data_gbm_clean$waterfront <- as.factor(data_gbm_clean$waterfront)
+data_gbm_clean$sold_date <- openxlsx::convertToDate(data_gbm_clean$sold_date)
+data_gbm_clean$sold_date <- as.numeric(data_gbm_clean$sold_date)
+str(data_gbm_clean)
+
+# Splits
+data_gbm_clean$city_limits <- as.factor(data_gbm_clean$city_limits)
+data_gbm_clean$corona_date_split <- as.factor(data_gbm_clean$corona_date_split)
+data_gbm_clean$top25_sold_price <- as.factor(data_gbm_clean$top25_sold_price)
+data_gbm_clean$bottom25_sold_price <- as.factor(data_gbm_clean$bottom25_sold_price)
+data_gbm_clean$top25_area_living <- as.factor(data_gbm_clean$top25_area_living)
+data_gbm_clean$bottom25_area_living  <- as.factor(data_gbm_clean$bottom25_area_living)
+data_gbm_clean$top25_age <- as.factor(data_gbm_clean$top25_age)
+data_gbm_clean$bottom25_age <- as.factor(data_gbm_clean$bottom25_age)
+data_gbm_clean$top25_dom <- as.factor(data_gbm_clean$top25_dom)
+data_gbm_clean$bottom25_dom <- as.factor(data_gbm_clean$bottom25_dom)
+data_gbm_clean$infections_period <- as.numeric(data_gbm_clean$infections_accum > 1000)
+data_gbm_clean$infections_period <- as.factor(data_gbm_clean$infections_period)
+str(data_gbm_clean)
+
+# Remove this weird '20' level is bath_full
+levels(data_gbm_clean$bath_full)
+is.na(data_gbm_clean$bath_full) <- data_gbm_clean$bath_full == "20"
+data_gbm_clean$bath_full <- factor(data_gbm_clean$bath_full)
+levels(data_gbm_clean$bath_full)
+
+# Remove beds_total > 5
+levels(data_gbm_clean$beds_total)
+is.na(data_gbm_clean$beds_total) <- data_gbm_clean$beds_total == "7" 
+data_gbm_clean$beds_total <- factor(data_gbm_clean$beds_total)
+is.na(data_gbm_clean$beds_total) <- data_gbm_clean$beds_total == "6" 
+data_gbm_clean$beds_total <- factor(data_gbm_clean$beds_total)
+
+# Non_linear Additions
+data_gbm_clean$age_2 <- I(data_gbm_clean$age^2)
+data_gbm_clean$area_living_2 <- I(data_gbm_clean$area_living^2)
+
+# Removals
+data_gbm_clean <- subset(data_gbm_clean, select = -c(area_total, list_price))
+names(data_gbm_clean)
+
+# Remove other currently non-relevant variables 
+data_gbm_clean <- subset(data_gbm_clean, select = -c(mls_number, infections_accum, corona_date_split, top25_sold_price, 
+                                                     top50_sold_price, bottom25_sold_price,infections_period, infections_daily))
+names(data_gbm_clean)
+
+```
+
+<br>
+
+### 1. Data Splitting
+```{r}
+# Create training (70%) and test (30%) sets for data.
+# Use set.seed for reproducibility
+set.seed(1)
+split <- initial_split(data_gbm_clean, prop = .7)
+train <- training(split)
+test  <- testing(split)
+
+names(train)
+```
+
+<br>
+
+### 2. Structure Data: One-Hot Encoding
+```{r}
+# variable names
+features <- setdiff(names(train), "sold_price")
+features
+
+# Create the treatment plan from the training data
+treatplan <- vtreat::designTreatmentsZ(train, features, verbose = FALSE)
+
+# Get the "clean" variable names from the scoreFrame
+new_vars <- treatplan %>%
+  magrittr::use_series(scoreFrame) %>%        
+  dplyr::filter(code %in% c("clean", "lev")) %>% 
+  magrittr::use_series(varName)     
+
+# Prepare the training data
+features_train <- vtreat::prepare(treatplan, train, varRestriction = new_vars) %>% as.matrix()
+response_train <- train$sold_price
+
+# Prepare the test data
+features_test <- vtreat::prepare(treatplan, test, varRestriction = new_vars) %>% as.matrix()
+response_test <- test$sold_price
+
+# dimensions of one-hot encoded data
+dim(features_train)
+dim(features_test)
+```
+
+<br>
+
+### 3. Base Model with Early Stoppage
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+# reproducibility
+set.seed(1)
+
+start_time <- Sys.time()
+xgb.fit1 <- xgb.cv(
+  data = features_train,
+  label = response_train,
+  nrounds = 1000,
+  nfold = 5,
+  objective = "reg:linear",  # for regression models
+  verbose = 0,               # silent,
+  early_stopping_rounds = 10 # stop if no improvement for 10 consecutive trees
+)
+end_time <- Sys.time()
+time_taken <- end_time - start_time
+time_taken
+
+# get number of trees that minimize error
+xgb.fit1$evaluation_log %>%
+  dplyr::summarise(
+    ntrees.train = which(train_rmse_mean == min(train_rmse_mean))[1],
+    rmse.train   = min(train_rmse_mean),
+    ntrees.test  = which(test_rmse_mean == min(test_rmse_mean))[1],
+    rmse.test   = min(test_rmse_mean),
+  )
+
+# plot error vs number trees
+ggplot(xgb.fit1$evaluation_log) +
+  geom_line(aes(iter, train_rmse_mean), color = "red") +
+  geom_line(aes(iter, test_rmse_mean), color = "blue")
+
+stopCluster(cl)
+```
+
+<br>
+
+### 4. Hyperparameter Tuning
+```{r, warning=FALSE, attr.output='style="max-height: 250px;"'}
+# create hyperparameter grid
+hyper_grid <- expand.grid(
+  eta = c(.01, .05, .1, .3),
+  max_depth = c(1, 3, 5, 7),
+  min_child_weight = c(1, 3, 5, 7),
+  subsample = c(.65, .8, 1), 
+  colsample_bytree = c(.8, .9, 1),
+  optimal_trees = 0,               # a place to dump results
+  min_RMSE = 0                     # a place to dump results
+)
+
+nrow(hyper_grid)
+## [1] 576
+
+# Manual Grid Search
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+for(i in 1:nrow(hyper_grid)) {
+  
+  # create parameter list
+  params <- list(
+    eta = hyper_grid$eta[i],
+    max_depth = hyper_grid$max_depth[i],
+    min_child_weight = hyper_grid$min_child_weight[i],
+    subsample = hyper_grid$subsample[i],
+    colsample_bytree = hyper_grid$colsample_bytree[i]
+  )
+  
+  # reproducibility
+  set.seed(007)
+  
+  # train model
+  xgb.tune <- xgb.cv(
+    params = params,
+    data = features_train,
+    label = response_train,
+    nrounds = 5000,
+    nfold = 5,
+    objective = "reg:linear",  # for regression models
+    verbose = 0,               # silent,
+    early_stopping_rounds = 10 # stop if no improvement for 10 consecutive trees
+  )
+  
+  # add min training error and trees to grid
+  hyper_grid$optimal_trees[i] <- which.min(xgb.tune$evaluation_log$test_rmse_mean)
+  hyper_grid$min_RMSE[i] <- min(xgb.tune$evaluation_log$test_rmse_mean)
+}
+
+hyper_grid %>%
+  dplyr::arrange(min_RMSE) %>%
+  head(10)
+
+
+stopCluster(cl)
+
+# Order:   rank, eta, max_depth, min_child_weight, subsample, colsample_bytree,
+#          optimal_trees, min_RMSE  
+
+# 1	0.01	7	         1	0.65	0.9	1827	41952.29
+# 2	0.01	7	         5	0.65	0.9	1747	41967.81
+# 3	0.01	7	         3	0.65	1.0	1695	42002.20
+# 4	0.01	7	         1	0.65	1.0	1670	42004.94
+# 5	0.01	7	         3	0.65	0.8	1583	42008.42
+# 6	0.01	7	         7	0.65	0.9	1607	42016.38
+# 7	0.01	7	         5	0.65	1.0	1556	42029.93
+# 8	0.01	7	         5	0.65	0.8	1479	42038.12
+# 9	0.01	7	         7	0.65	1.0	1555	42045.10
+#10	0.01	7	         7	0.65	0.8	1478	42065.54
+
+
+
+```
+
+
+### 4.1 Final Model with Tuned Hypers
+```{r}
+
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+start_time <- proc.time()
+# parameter list
+params <- list(
+  eta = 0.01,
+  max_depth = 7,
+  min_child_weight = 1,
+  subsample = 0.65,
+  colsample_bytree = 0.9
+)
+
+# train final model
+xgb.fit.final <- xgboost(
+  params = params,
+  data = features_train,
+  label = response_train,
+  nrounds = 1827,
+  objective = "reg:linear",
+  verbose = 0
+)
+end_time <- proc.time()
+time_taken <- end_time - start_time
+time_taken
+
+stopCluster(cl)
+
+
+# Test Error of final Model
+# predict values for test data
+pred <- predict(xgb.fit.final, features_test)
+
+# results
+caret::RMSE(pred, response_test)
+## [1] 21319.4
+
+# plot error vs number trees
+ggplot(xgb.fit.final$evaluation_log) +
+  geom_line(aes(iter, train_rmse), color = "red")
+
+# plot error vs number trees
+ggplot(xgb.fit.final$evaluation_log) +
+  geom_line(aes(iter, train_rmse), color = "red")
+
+
+```
+
+<br>
+
+### 5. Model Analysis and Visualizations
+
+#### 5.1 Variable Importance
+```{r}
+vip::vip(xgb.fit.final)
+
+# create importance matrix
+importance_matrix <- xgb.importance(model = xgb.fit.final)
+
+# variable importance plot
+xgb.plot.importance(importance_matrix, top_n = 20, measure = "Gain")
+```
+
+#### 5.2 Partial Dependence Plots
+##### 5.2.1 Corona
+###### 5.2.4.1 Standard PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "infections_3mma", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "infections_3mma", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
+
+
+##### 5.2.3 Living Area
+###### 5.2.4.1 Standard PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "area_living", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "area_living", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
+
+###### 5.2.4.1 Multi_Variable PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+# Heatmap with Contour
+pdp_heat_con <- xgb.fit.final %>%
+  partial(pred.var = c("infections_3mma", "area_living"), chull = TRUE, 
+          progress = "text", train = features_train, levelplot = FALSE) %>%
+  autoplot(rug = TRUE, 
+           contour = TRUE, 
+           contour.color = "#F0FFF0", 
+           train = features_train,
+           main = "Infections and Living Area",
+           xlab = "Daily Infections (3mma)",
+           ylab = "Living Area",
+           legend.title = "Sold Price"
+           )
+
+# 3D Graphing
+# Create 3D data matrix 
+infections_3d <- pdp_heat_con$data$infections_3mma
+area_living_3d <- pdp_heat_con$data$area_living
+yhat_3d <- pdp_heat_con$data$yhat
+pdp_mat <- data.frame(infections_3d, area_living_3d, yhat_3d) # Datafram for plotly 3D model
+
+# Axis Titles
+axx <- list(title = "Infections Daily")
+axy <- list(title = "Living Area")
+axz <- list(title = "Price Sold")
+
+# Colors: Manually matching plot standard gradient
+very_low <- "#460f5c"
+low <- "#2c728e"
+med <- "#27ad81"
+high <- "#f4e61e"
+
+pdp_3d <- plot_ly(pdp_mat, x = ~infections_3d, y = ~area_living_3d, z = ~yhat_3d,
+             type = 'mesh3d', intensity = ~yhat_3d, 
+            colors = colorRamp(c(very_low, med, high)))
+pdp_3d <- pdp_3d %>%  layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz)) # Axis labs
+pdp_3d <- hide_colorbar(pdp_3d) # Hide legend
+
+# Print out 
+gridExtra::grid.arrange(pdp_heat_con, nrow = 1)
+pdp_3d
+
+stopCluster(cl)
+```
+
+##### 5.2.4 Days On Market
+###### 5.2.4.1 Standard PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "dom", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "dom", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
+
+
+###### 5.2.4.1 Multi_Variable PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+# Heatmap with Contour
+pdp_heat_con <- xgb.fit.final %>%
+  partial(pred.var = c("infections_3mma", "dom"), chull = TRUE, 
+          progress = "text", train = features_train, levelplot = FALSE) %>%
+  autoplot(rug = TRUE, 
+           contour = TRUE, 
+           contour.color = "#F0FFF0", 
+           train = features_train,
+           main = "Infections and Days on Market",
+           xlab = "Daily Infections (3mma)",
+           ylab = "Days on Market",
+           legend.title = "Sold Price"
+           )
+
+# 3D Graphing
+# Create 3D data matrix 
+infections_3d <- pdp_heat_con$data$infections_3mma
+dom_3d <- pdp_heat_con$data$dom
+yhat_3d <- pdp_heat_con$data$yhat
+pdp_mat <- data.frame(infections_3d, dom_3d, yhat_3d) # Datafram for plotly 3D model
+
+# Axis Titles
+axx <- list(title = "Infections Daily")
+axy <- list(title = "Days on Market")
+axz <- list(title = "Price Sold")
+
+# Colors: Manually matching plot standard gradient
+very_low <- "#460f5c"
+low <- "#2c728e"
+med <- "#27ad81"
+high <- "#f4e61e"
+
+pdp_3d <- plot_ly(pdp_mat, x = ~infections_3d, y = ~dom_3d, z = ~yhat_3d,
+             type = 'mesh3d', intensity = ~yhat_3d, 
+             colors = colorRamp(c(very_low, med, high)))
+pdp_3d <- pdp_3d %>%  layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz)) # Axis labs
+pdp_3d <- hide_colorbar(pdp_3d) # Hide legend
+
+# Print out 
+gridExtra::grid.arrange(pdp_heat_con, nrow = 1)
+pdp_3d
+
+stopCluster(cl)
+```
+
+##### 5.2.5 Age
+###### 5.2.4.1 Standard PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "age", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "age", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
+
+###### 5.2.4.1 Multi_Variable PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+# Heatmap with Contour
+pdp_heat_con <- xgb.fit.final %>%
+  partial(pred.var = c("infections_3mma", "age"), chull = TRUE, 
+          progress = "text", train = features_train, levelplot = FALSE) %>%
+  autoplot(rug = TRUE, 
+           contour = TRUE, 
+           contour.color = "#F0FFF0", 
+           train = features_train,
+           main = "Infections and Age of Property",
+           xlab = "Daily Infections (3mma)",
+           ylab = "Age of Property",
+           legend.title = "Sold Price"
+           )
+
+# 3D Graphing
+# Create 3D data matrix 
+infections_3d <- pdp_heat_con$data$infections_3mma
+age_3d <- pdp_heat_con$data$age
+yhat_3d <- pdp_heat_con$data$yhat
+pdp_mat <- data.frame(infections_3d, age_3d, yhat_3d) # Datafram for plotly 3D model
+
+# Axis Titles
+axx <- list(title = "Infections Daily")
+axy <- list(title = "Age of Property")
+axz <- list(title = "Price Sold")
+
+# Colors: Manually matching plot standard gradient
+very_low <- "#460f5c"
+low <- "#2c728e"
+med <- "#27ad81"
+high <- "#f4e61e"
+
+pdp_3d <- plot_ly(pdp_mat, x = ~infections_3d, y = ~age_3d, z = ~yhat_3d,
+             type = 'mesh3d', intensity = ~yhat_3d, 
+            colors = colorRamp(c(very_low, med, high)))
+pdp_3d <- pdp_3d %>%  layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz)) # Axis labs
+pdp_3d <- hide_colorbar(pdp_3d) # Hide legend
+
+# Print out 
+gridExtra::grid.arrange(pdp_heat_con, nrow = 1)
+pdp_3d
+
+stopCluster(cl)
+```
+
+
+##### 5.2.6 Sold Date
+###### 5.2.4.1 Standard PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "sold_date", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "sold_date", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
+
+###### 5.2.4.1 Multi_Variable PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+# Heatmap with Contour
+pdp_heat_con <- xgb.fit.final %>%
+  partial(pred.var = c("infections_3mma", "sold_date"), chull = TRUE, 
+          progress = "text", train = features_train, levelplot = FALSE) %>%
+  autoplot(rug = TRUE, 
+           contour = TRUE, 
+           contour.color = "#F0FFF0", 
+           train = features_train,
+           main = "Infections and Date Sold",
+           xlab = "Daily Infections (3mma)",
+           ylab = "Date Sold",
+           legend.title = "Sold Price"
+           )
+
+# 3D Graphing
+# Create 3D data matrix 
+infections_3d <- pdp_heat_con$data$infections_3mma
+sold_date_3d <- pdp_heat_con$data$sold_date
+yhat_3d <- pdp_heat_con$data$yhat
+pdp_mat <- data.frame(infections_3d, sold_date_3d, yhat_3d) # Datafram for plotly 3D model
+
+# Axis Titles
+axx <- list(title = "Infections Daily")
+axy <- list(title = "Date Sold")
+axz <- list(title = "Price Sold")
+
+# Colors: Manually matching plot standard gradient
+very_low <- "#460f5c"
+low <- "#2c728e"
+med <- "#27ad81"
+high <- "#f4e61e"
+
+pdp_3d <- plot_ly(pdp_mat, x = ~infections_3d, y = ~sold_date_3d, z = ~yhat_3d,
+             type = 'mesh3d', intensity = ~yhat_3d, 
+            colors = colorRamp(c(very_low, med, high)))
+pdp_3d <- pdp_3d %>%  layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz)) # Axis labs
+pdp_3d <- hide_colorbar(pdp_3d) # Hide legend
+
+# Print out 
+gridExtra::grid.arrange(pdp_heat_con, nrow = 1)
+pdp_3d
+
+stopCluster(cl)
+```
+
+##### 5.2.7 Photo Count
+###### 5.2.4.1 Standard PDP
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "photo_count", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "photo_count", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
+
+
+##### 5.2.2 Price
+##### 5.2.2 Number of Bedrooms
+
+
+### Playground
+LIME
+```{r}
+# one-hot encode the local observations to be assessed.
+local_obs_onehot <- vtreat::prepare(treatplan, local_obs, varRestriction = new_vars)
+
+# apply LIME
+explainer <- lime(data.frame(features_train), xgb.fit.final)
+explanation <- explain(local_obs_onehot, explainer, n_features = 5)
+plot_features(explanation)
+```
+
+
+Predicting impact of higher cases of corona
+```{r}
+# predict values for test data
+
+feature_test <- features_test[1:2,]
+
+pred <- predict(xgb.fit.final, feature_test)
+pred
+
+?predict
+
+# results
+caret::RMSE(pred, response_test)
+## [1] 21319.3
+```
+
+
+
+```{r}
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+# reproducibility
+set.seed(2)
+
+start_time <- proc.time()
+xgb.fit.final <- xgboost(
+  data = features_train,
+  label = response_train,
+  nrounds = 950,
+  nfold = 5,
+  objective = "reg:linear",   # for regression models
+  verbose = 0,                # silent,
+  early_stopping_rounds = 10  # stop if no improvement for 10 consecutive trees
+)
+end_time <- proc.time()
+time_taken <- end_time - start_time
+time_taken
+
+stopCluster(cl)
+```
+
+
+
+End of Code
+
+
+
+
+

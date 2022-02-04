@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+**Todos**
+
+* Use raw data set
+* Transform to to log(sold_price)? 
+
+
+Load packages
+```{r}
+library(tidyverse)
+library(neuralnet)
+library(GGally)
+```
+
+Read in Data
+```{r}
+# Read in data
+library(readxl)
+data_bi_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Github_Thesis_SMB/Models/Data/Data bi/data_bi_clean_26.12.21.xlsx")
+```
+
+
+Scale Variables
+```{r}
+# Scale the Data
+scale01 <- function(x){
+  (x - min(x)) / (max(x) - min(x))
+}
+
+data_bi_clean <- data_bi_clean %>%
+  mutate_all(scale01)
+attach(data_bi_clean)
+
+data_bi_clean <- subset(data_bi_clean, select = -c(property_type_TNH, condition_new, beds_total_6, bath_full_5, bath_full_6, bath_full_7, bath_half_3))
+
+
+# Split into test and train sets
+set.seed(1)
+data_bi_clean_train <- sample_frac(tbl = data_bi_clean, replace = FALSE, size = 0.80)
+data_bi_clean_test <- anti_join(data_bi_clean, data_bi_clean_train)
+```
+
+```{r}
+set.seed(2)
+Model_NN1 <- neuralnet(sold_price ~ ., data = data_bi_clean_train)
+
+plot(Model_NN1, rep = 'best')
+```
+
+```{r}
+Model_NN1_Train_SSE <- sum((Model_NN1$net.result - data_bi_clean_test[ , 7])^2)/2
+paste("SSE: ", round(Model_NN1_Train_SSE, 4))
+## [1] "SSE:  0.0361"
+```
+
+
+
+
+

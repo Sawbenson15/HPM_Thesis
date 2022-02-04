@@ -1,0 +1,389 @@
+---
+title: "Hedonic Pricing Models with Machine Learning"
+output:
+  html_notebook: default
+  pdf_document: default
+code_folding: hide
+Author: Sawyer Benson
+---
+
+### Sawyer Benson's Master Thesis 
+### December 20, 2021
+
+<br>
+
+### Current Progress on ML Models & Methodology 
+
+<br>
+
+#### Outline of This Document
+1.  Subset Selection Models
+    + Validation Set Approach
+    + K-Fold Cross Validation Set Approach
+2.  Shrinkage Models
+    + Standard Shrinkage Models (i.e. Ridge & LASSO)
+    + Shrinkage Models + K-Fold CV
+
+<br>
+
+```{r, results = 'hide', collapse=FALSE}
+# Reading in Packages
+
+library(ggplot2) # Graphs
+library(tinytex) #for RMarkdown
+library(tidyr) # Data wrangling
+library(dplyr) # Data wrangling
+library(gridExtra) # Organize graphs
+library(boot) # K-fold
+library(leaps) # Subset 
+library(glmnet) #glmnet() is the main function in the glmnet package (must pass in an x matrix as well as a y vector)
+
+library(readxl)
+data_bi_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Github_Thesis_SMB/Models/Data/data_bi_clean_26.12.21.xlsx")
+
+# Remove linear dependencies
+data_bi_clean <- subset(data_bi_clean, select = -c(beds_total, school_general,
+                                       bath_full, bath_half, bath_half_4,
+                                       bath_full_7, property_type_DUP,
+                                       post_corona_bi, property_type_TNH,
+                                       roof_type_other, condition_other,
+                                       exterior_type_other, exterior_features_none,
+                                       foundation_type_other, beds_total_5,
+                                       beds_total_6, bath_half_5,
+                                       sewer_type_other, spa_location_none,
+                                       property_style_other, water_type_none, sold_date))
+total_living
+
+```
+
+<br>
+
+### 1. Subset Selection Models
+
+```{r, attr.output='style="max-height: 350px;"'}
+# Standard Model on full data set (choosing forward selection for now)
+nvmax <- 72
+regfit.base <- regsubsets(log(sold_price) ~ . ,
+                         data = data_bi_clean,
+                         nvmax = nvmax,
+                         method= "forward")
+summary(regfit.base)
+mse_base <- (summary(regfit.base)$rss / nrow(data_bi_clean))^2 #This is a manual way to get MSE from any subset
+```
+
+<br>
+
+#### 1.1 Validation Set
+```{r, attr.output='style="max-height: 350px;"'}
+#Validation set approach
+set.seed(1)
+train <- sample(c(TRUE, FALSE), nrow(data_bi_clean), replace = TRUE) #use only the training observations to perform all aspects of model-fitting - including variable selection
+test <- (!train)
+table(train) #Checking to make sure data didn't get randomly split in a weird way between training and test
+table(test) #Subset selection on training data created using Validation Set Approach (as appose to K-Fold)
+
+# lm Check
+# Note: Each unique data split can cause dependencies between variables with not a lot of variation.
+
+lm <- lm(sold_price ~ ., data_bi_clean)
+summary(lm)
+
+lm <- lm(sold_price ~ ., data_bi_clean[train,])
+summary(lm)
+
+lm <- lm(sold_price ~ ., data_bi_clean[test,])
+summary(lm)
+
+# Forward selection on training data
+nvmax <- 72
+regfit.fwd <- regsubsets(log(sold_price) ~ . ,
+                         data = data_bi_clean[train,],
+                         nvmax = nvmax,
+                         method= "forward")
+summary(regfit.fwd)
+mse_train <- (summary(regfit.fwd)$rss / nrow(data_bi_clean))^2 #This is a manual way to get MSE from any subset
+
+
+# Make a model matrix from the test data. Create prediction using test data with model trained on training date 
+test.mat <- model.matrix(log(sold_price) ~ . ,
+                         data = data_bi_clean[test,],
+                         nvmax = nvmax,
+                         method = "forward") 
+
+
+dim(test.mat)
+val.errors <- rep(0, 71) #Creating empty container for val.errors for null model to 71Var model
+for (i in 1:71){
+  coef.i <- coef(regfit.fwd, i) #extract the coefficients TRAINING
+  pred.i <- test.mat[, names(coef.i)] %*% coef.i #Put coef into TEST data for predictions - multiply them into the appropriate columns of the test model matrix to form the predictions
+  val.errors[i] <- mean((log(data_bi_clean$sold_price[test]) - pred.i)^2) #compute the test MSE
+}
+
+a <- data_bi_clean$sold_price[test]
+b <- pred.i
+
+val.errors
+which.min(val.errors) #70-Variable model has min Test MSE
+coef(regfit.fwd, 58) #Shows which best 58 variables
+
+
+# Graphing MSE
+par(mfrow = c(1,1))
+plot(val.errors, ylab = "Test Mean Squared Error" , xlab = "Number of Variables", main = "Test MSE using Validation Set Approach")
+?plot
+lines(val.errors, lwd = 2, col = "blue")
+abline(v = which.min(val.errors))
+```
+<br>
+
+#### 1.2 Functional Validation Set  
+```{r , attr.output='style="max-height: 350px;"'}
+# A functional way to get validation errors from 
+predict.regsubsets <- function(object, newdata, id, ...){ #predict() method for regsubsets()
+  form <- as.formula(object$call[[2]])
+  mat <- model.matrix(form, newdata)
+  coef.i <- coef(object, id)
+  xvars <- names(coef.i)
+  mat[, xvars] %*% coef.i
+}
+
+val.errors <- rep(0, 71)
+for (i in 1:71){
+  pred.i <- predict(regfit.fwd, data_bi_clean[test,], i)
+  val.errors[i] <- mean((log(data_bi_clean$sold_price[test]) - pred.i)^2)
+}
+val.errors
+which.min(val.errors) #Again, we see that 58-Variable model has min Test MSE
+```
+
+<br>
+
+#### 1.3 K-fold Cross Validation
+```{r, attr.output='style="max-height: 350px;"'}
+#k-fold cross-validation
+k <- 10
+set.seed(1)
+folds <- sample(1:k, nrow(data_bi_clean), replace = TRUE)
+sum.errors <- rep(0, 71)
+sum2.errors <- rep(0, 71)
+
+for (j in 1:k){
+  best.fit <- regsubsets(log(sold_price) ~ . ,
+                           
+                              data = data_bi_clean[folds != j,],
+                              nvmax = 71,
+                              method = "forward")
+  
+  for (i in 1:71){
+    pred <- predict(best.fit, data_bi_clean[folds == j,], i)
+    sum.errors[i] <- sum.errors[i] + sum((log(data_bi_clean$sold_price[folds == j]) - pred)^2)
+    sum2.errors[i] <- sum2.errors[i] + sum(((log(data_bi_clean$sold_price[folds == j]) - pred)^2)^2)
+  }
+}
+
+cv.errors <- sum.errors / nrow(data_bi_clean) #Cross Validation Test Errors
+cv.errors
+#Standard error (NOT standard deviation). Know the difference
+se.errors <- 1 / sqrt(nrow(data_bi_clean)) * sqrt(nrow(data_bi_clean) / (nrow(data_bi_clean) - 1) * (sum2.errors / nrow(data_bi_clean) - cv.errors^2))
+cv.errors; se.errors
+which.min(cv.errors)
+cv.errors <= cv.errors[71] + se.errors[71] #All models cv.errors that are less than or = cv.error[71]
+
+# Errors
+(summary(regfit.fwd)$rss / nrow(data_bi_clean))^2 #This is a manual way to get MSE from any subset
+val.errors
+cv.errors
+
+#Graphing
+
+#Note: Training error is tiny compared to test MSE of both validation and cross-validation approaches
+plot(summary(regfit.fwd)$rss / nrow(data_bi_clean), xlab = "Number of Variables", ylab = "Mean Squared Error", 
+                                              type = "l", lwd = 2, col = "black", ylim = c(0,0.5)) 
+lines(val.errors, lwd = 2, col = "red")
+lines(cv.errors, lwd = 2, col = "blue")
+
+
+legend("topright", legend = c("Training error (best subset)", "Validation set approach", "10-fold cross-validation"), col = c("black", "red", "blue"), lty = 1, lwd = 2)
+
+# At 58 
+abline(h = cv.errors[58], v = 58, lwd = 1, col = "cornflowerblue")
+points(58, cv.errors[58], col = "cornflowerblue", cex = 2, pch = 20)
+text(58, cv.errors[58], "Actual Minimum", pos = 3)
+
+?col
+
+# At 58 +1SE
+abline(h = cv.errors[58] + se.errors[58], v = 14, lwd = 1, col = "cornflowerblue")
+points(14, cv.errors[14], col = "cornflowerblue", cex = 2, pch = 20)
+text(14, cv.errors[14] + .002, "One-standard-error rule", pos = 3)
+
+
+# Notes and Todos:***
+# - It may be the case that the data in simply not good enough to predict any closer to the ideal fit to training data.
+#   However, this doesn't change my ability to compare the improvements in predictability between subsets.
+# - Need to find the 1-SE rule and implement it for a final variable selection level and model.
+# - NOTICE: that switched to log(sold_price)
+# - Need to run BEST subset selection for base_case.
+# - Changed data set to binary only. Fit OLS with this?
+
+
+
+
+# - Now that we have decided that 14 is the lowest number of variables we can use that is 1-standard
+#   error from the minimum test MSE of 58 variables. 
+#   We now run the best 14-variable model on the full data set
+```
+
+<br>
+
+#### Final Results
+
+<br>
+
+> This **14-variable model** is the most parsimonious (using fewest variables) model that is within 1 standard error from the 58-variable model which produced the absolute minimum test MSE. 
+
+>Printed below is the best 14-variables model from our data set according to a Farward Stepwise Selection process. 
+
+```{r, attr.output='style="max-height: 350px;"'}
+coef(regfit.base, 14) #Final minimum test MSE + 1SE model on full data set
+```
+
+
+<br><br>
+
+### 2. Shrinkage Models
+
+```{r, results = 'hide', collapse=FALSE}
+library(readxl)
+data_bi_clean <- read_excel("Data/Data__Bi_ML_20.12.21.xlsx")
+data_bi_clean <- drop_na(data_bi_clean) # Drop Na Values
+attach(data_bi_clean)
+
+# Remove linear dependencies
+names(data_bi_clean)
+data_bi_clean <- subset(data_bi_clean, select = -c(beds_total, school_general,
+                                       bath_full, bath_half, bath_half_4,
+                                       bath_full_7, property_type_DUP,
+                                       post_corona_bi, property_type_TNH,
+                                       roof_type_other, condition_other,
+                                       exterior_type_other, exterior_features_none,
+                                       foundation_type_other, beds_total_5,
+                                       beds_total_6, bath_half_5,
+                                       sewer_type_other, spa_location_none,
+                                       property_style_other, water_type_none, sold_date))
+
+# Set x-y definitions for glmnet package 
+
+x <- model.matrix(log(sold_price) ~ . ,
+                  
+                                 data = data_bi_clean)[, -1]
+
+y <- log(data_bi_clean$sold_price)
+```
+
+<br><br>
+
+#### 2.1 Standard Shrinkage Models
+
+<br>
+
+##### 2.1.1 Ridge Regression
+```{r, attr.output='style="max-height: 350px;"'}
+# General grid
+grid <- exp(seq(10, -72, length = 101)) #grid of values from exp(10) [null model] to exp(-15) [least squares]
+
+# Questions: what is the 61?
+
+# Ridge
+par(mfrow = c(1,1))
+ridge.mod <- glmnet(x, y, alpha = 0, lambda = grid) #if alpha = 0 then ridge regression (variables are standardized by default)
+dim(coef(ridge.mod)) #one row for each predictor, plus an intercept, one column for each value of lambda
+plot(ridge.mod, "lambda") #coefficients vs. log(lambda)
+print(ridge.mod)
+coef(ridge.mod, s = 0.1)
+coef(ridge.mod, s = "lambda.min") # Get variable associated with minimum Lambda
+
+
+ridge.mod$lambda[61]; log(ridge.mod$lambda[61])
+coef(ridge.mod)[, 61]
+sqrt(sum(coef(ridge.mod)[-1, 61]^2)) #l2 norm
+plot(ridge.mod) #coefficients vs. l1 norm(!)
+sqrt(sum(predict(ridge.mod, s = 0, exact = TRUE, type = "coefficients", x = x, y = y)[2:29]^2)) #numerical approximation to lm()
+```
+
+<br><br>
+
+##### 2.1.2 LASSO Regression
+```{r, attr.output='style="max-height: 350px;"'}
+# Lasso
+par(mfrow = c(1,1))
+lasso.mod <- glmnet(x, y, alpha = 1, lambda = grid) #if alpha = 1 then lasso (some of the coefficients will be exactly equal to zero)
+dim(coef(lasso.mod))
+plot(lasso.mod, "lambda")
+lasso.mod$lambda[61]; log(lasso.mod$lambda[61])
+coef(lasso.mod)[, 61]
+sum(abs(coef(lasso.mod)[-1, 61])) #l1 norm
+plot(lasso.mod)
+sum(abs(predict(lasso.mod, s = 0, exact = TRUE, type = "coefficients", x = x, y = y)[2:29]))
+```
+
+<br>
+
+#### 2.2 Shrinkage Models *with* K-fold Cross Validation
+
+<br>
+
+##### 2.2.1 Ridge Regression + K-fold CV
+
+```{r, attr.output='style="max-height: 350px;"'}
+#k-fold cross-validation
+# Ridge
+par(mfrow = c(1,1))
+set.seed(1)
+cv.out <- cv.glmnet(x, y, alpha = 0, lambda = grid, nfolds = 10) #ridge regression (ten-fold cross-validation)
+plot(cv.out) #test MSE vs. log(lambda)
+coef(cv.out, s = "lambda.min")
+
+bestlam <- cv.out$lambda.min; bestlam; log(bestlam) #value of lambda that results in the smallest cross-validation error
+out <- cv.out$glmnet.fit #full data set
+ridge.coef <- predict(out, type = "coefficients", s = bestlam); ridge.coef
+sqrt(sum(ridge.coef[2:29]^2)) #l2 norm
+bestlam2 <- cv.out$lambda.1se; bestlam2; log(bestlam2) #one-standard-error rule
+ridge.coef2 <- predict(out, type = "coefficients", s = bestlam2); ridge.coef2
+sqrt(sum(ridge.coef2[2:29]^2))
+```
+
+<br><br>
+
+##### 2.2.2 LASSO Regression + K-fold CV
+```{r, attr.output='style="max-height: 250px;"'}
+#Lasso
+set.seed(1)
+cv.out <- cv.glmnet(x, y, alpha = 1, lambda = grid, nfolds = 10) #lasso
+plot(cv.out)
+bestlam <- cv.out$lambda.min; bestlam; log(bestlam)
+out <- cv.out$glmnet.fit
+lasso.coef <- predict(out, type = "coefficients", s = bestlam); lasso.coef; lasso.coef[lasso.coef != 0]
+sum(abs(lasso.coef[2:29])) #l1 norm
+bestlam2 <- cv.out$lambda.1se; bestlam2; log(bestlam2)
+```
+
+<br><br>
+
+#### Final Result
+
+<br>
+
+> This is the final reduced **33-variable model** which minimized test MSE using LASSO and K-fold CV.
+
+> Note that variables with "." instead of coeffecients were eliminated from the final model.
+
+```{r, attr.output='style="max-height: 250px;"'}
+lasso.coef2 <- predict(out, type = "coefficients", s = bestlam2); lasso.coef2; lasso.coef2[lasso.coef2 != 0]
+sum(abs(lasso.coef2[2:29]))
+```
+
+
+
+
+End of Document
