@@ -4,8 +4,8 @@ title: An Emperical Economic Investigation into COVID-19's Impact on Fundemental
 author: "Sawyer M. Benson"
 date: "December 21, 2021"
 output:
-  word_document: default
   html_notebook: default
+  word_document: default
   pdf_document: default
 bibliography: library.bib
 link-citations: yes
