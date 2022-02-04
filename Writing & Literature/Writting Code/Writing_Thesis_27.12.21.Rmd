@@ -1,0 +1,930 @@
+---
+title: An Emperical Economic Investigation into COVID-19's Impact on Fundemental Hedonic
+  Features in Real Estate Valuation Models
+author: "Sawyer M. Benson"
+date: "December 21, 2021"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+bibliography: library.bib
+link-citations: yes
+---
+
+<br><br>
+
+### Cover Page
+
+Under construction
+
+<br>
+
+### Abstract
+
+Under construction
+
+<br>
+
+###     Table of Contents
+
+1. **Introduction**
+2. **Literature Review**
+3. **Data**
+4. **Methodology**
+5. **Results**
+6. **Discussion**
+7. **Conclusion**
+8. **Bibliography**
+9. **Appendix**
+
+<br>
+
+### Figures, Tables, and Abbreviations
+Under construction
+
+<br><br>
+
+### 1. Introduction
+
+In late 2019, a virus first detected in Wuhan, China would set in motion a global pandemic which, by the end of 2021, will have
+killed 4.3 million people, infecting 238 million others, and disrupting the global economy across virtually every measurable
+dimension [@WHODeath]. According to seven economic impact models constructed by @McKibbin, estimates of the total global economic
+loss in terms of GDP are measured to be as large as 9.2 trillion U.S. dollars. However, despite a generally positive correlation between GDP and real estate prices *(see image 1)*, historically measured as high as 98%, real estate market prices in the U.S. hit near-record heights following the outbreak of COVID-19 [@AsiaGreen]. According to a report released by Zillow
+Analytics [@Manhertz], U.S. real estate gained 2.5 trillion dollars of value in 2020 alone, representing the largest single-year
+growth since 2005, despite an approximately 760 billion dollar decrease in GDP in the same year [@FRED2021]. The focus of this
+thesis is to investigate the reasons behind why and how real estate market prices have broken trend and behaved so
+uncharacteristically counter cyclical in the face of a global pandemic.
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
+</center>
+
+<br>
+
+In the following sections, I will apply the Hedonic Pricing Method (HPM) to Louisiana housing market data in order to inferentially describe the economic impact of the global pandemic on residential housing market values. Furthermore, I will take advantage of the HPM's structural framework of using real estate properties' hedonic features (e.g., size, age, number of bedrooms, etc.) to test for changes in demand for specific property features pre vs post pandemic. The HPM will be econometrically modeled using an Ordinary Least Squares (OLS) regressions framework for specific variable analysis while several variations of machine learning (ML) prediction models will be estimated to test different independent variables' maximum explanatory power in predicting out-of-sample observations. The results of these models will shed light into the otherwise counter intuitive response of real estate pricing dynamics to the COVID-19 global pandemic.    
+
+<br><br>
+
+### 2. Literature Review
+
+#### 2.1 Background
+
+The market value of a commodity is most often theoretically defined as the equilibrium price derived from the basic economic
+principal, or law, of supply and demand [@Locke; @Epple]. However, the real estate market often violates this assumption due to
+its unique characteristics as an asset class [@Wheaton]. For example, much of the underlying utility of a property is its use as a means of shelter
+by its owner [@Ling]. This rather unusual relationship to this asset introduces several behavioral biases which cause economic
+frictions not accounted for by traditional neoclassical economic theory [@Nicolaides]. A notable example of behavioral bias impacting real estate price dynamics is the endowment effect. This behavioral finding was originally established by
+@Kahneman in the late 20th century, and later applied to real estate markets by @BAO. The latter of the two stating that the predictably
+irrational behavior of market participants to overvalue their home due to sentimental attachment to the property forces market prices into sustained economic disequilibrium. Other highly cited and unusual characteristics are that real
+estate assets are very infrequently traded due to high transaction costs [@Collett; @Guilkey], governments tend to interfere, both
+directly and indirectly with real estate markets through the creation of fiscal and monetary policies [@Bingyang; @Du], and through
+creating renter-protections laws such as 'squatter's rights' laws which allow a renter to remain in a home for extended
+periods of time long after they have stopped paying rent [@Hoy; @Gardiner].
+
+#### 2.2 Real Estate Valuation Methods
+
+The idiosyncratic asset features outlined in section 2.1 along with a high level of heterogeneity across many dimensions of the entire real estate asset class makes the creation of a generalized pricing model difficult and have led to a wide range of proposals and recommendations about what determines the market price of real estate assets and how to reliably model those pricing dynamics [@Curcuru]. In @Pagourtzi, the authors outlines several of the currently accepted real estate valuation methods, ranging from what they categorize as the *traditional methods*, such as comparable-group, cost, income-multiple, profit-multiple, and contractor’s method, to the *advanced methods*, such as ANNs, spatial analysis methods, fuzzy logic, and the hedonic pricing method. According to a meta analysis conducted by @Sirmans, currently, the most widely used and accepted advanced methodological framework for real estate valuation modeling is the Hedonic Pricing Method.
+
+
+##### 2.2.1 Hedonic Prcing Model in Real Estate
+
+First applied in 1939 on automobile data, according to @Goodman, the HPM is a model which estimates the value of distinct characteristics of a commodity which directly or indirectly contribute to its market value. Besides its implementation in real estate finance and economics, such as in this thesis, this methodology has a wide range of applications such as its implementation in consumer and market research [@Holbrook; @Arnold], construction of consumer price indices [@Moulton; @Schultze], various tax assessments [@Berry; @Bernasconi], automated automobile valuation [@Crowling; @Matas], and computer sales [@Dulberger; @Wakefield].
+
+Since its introduction, the HPM has gain significant popularity among housing market and commercial real
+estate researchers. The specific real estate-based topics include, but are not limited to, the construction of housing price indices [@Gourieroux; @Wallace], the estimation and prediction of a property's market value in situations where market-transaction data is low-dimensional or non-existent
+[@LeSage], and, as in this thesis, the specific analysis of changes in the demand for specific property characteristics across time, subgroups, or
+both [@Clapp]. As the broad search for a satisfactory modeling framework focuses in on the HPM, another debate arises regarding the best functional form of this method. Traditionally utilizing the standard OLS framework [@Pace], researchers are increasingly utilizing a variety machine learning algorithms to accomplish an increasingly more refined set of findings.
+
+##### 2.2.2 OLS and the Hedonic Pricing Model in Real Estate
+Unsurprisingly, regression analysis is the preferred estimation approach among real estate researchers when using HPT for price estimation. These multiple regression analysis methods are most often either an Ordinary Least Squares (OLS) regression or a Maximum Likelihood approximation of the log-likely equation derived directly from the hedonic function. Each of these estimation methods take a functionally similar path as they both estimate a vector of parameters (i.e. beta coefficients) that best fits the explanatory hedonic variables to the associated market price. They differ only by the loss function used in the identification of that best-fitted parameter vector.
+
+The most commonly used hedonic price regression equation with respect to real estate markets models the relationship between market rents or market property values to a list of hedonic characteristics. The classical construction of this model according to **(Herath, S. K. & Maier, G. (2010))** is the following:
+
+$$
+R = f(P,N,L,t)
+$$
+where $R$ is rent or price of the property; $P$ is property related attributes; $N$ is neighborhood characteristics; $L$ is locational variables and; $t$ is an indicator of time.
+
+##### 2.2.3 Machine Learning and the Hedonic Pricing Model in Real Estate
+
+Though first introduced by @Turing under the broader umbrella term of *artificial intelligence*, the adoption of ML methods in real estate would take many years of software and hardware development, allowing or the subsequent collection of ever-larger data sets and central processing unites (CPUs) capable of processing the often extraordinary number of calculation required to produce a solution for a given algorithm [@Dutta]. The primary advantage of ML techniques are that ML algorithms learn and improve over time and across many iterations and variable combinations, while tradition statistical and econometric techniques produce static results across a single model [@Anguita].  
+ 
+@Mohd provides a thorough overview of the various applications of ML to real estate valuation methods, including the Ridge and Lasso regression techniques used in this thesis.
+
+**Work in Progress: Add more volume here. Possible addition of models?**
+
+<br>
+
+#### 2.3 COVID-19 Crisis' Impact on Real Estate Markets
+
+In the wake of the COVID-19 crisis, there were several papers and articles regarding the economic impact of the global pandemic on the housing market being expeditiously publishes in virtually every major journal. In this section (2.3), I have selected the most relevant of these publications with respect to this thesis.
+
+Structural and temporal changes in the housing market using hedonic methods [@Shimizu], 
+
+Changes in housing market demand for specific property types and features [@Tajani],  
+
+Potential changes in housing preferences due to the COVID-19 pandemic and highlight the challenges for policy making [@Nanda]
+
+
+
+<br>
+
+**Tonia Notes:**
+
+* Add multiple sources on some citations
+* Add real estate market during the crisis
+* Break into subsections from widest to most specific
+   + Make last subsection specific to this thesis, quoting sources and their findings
+* Meta analysis is good
+
+
+
+<br><br>
+
+### 3. Data 
+
+#### 3.1 Data Collection
+
+The utilization of Big Data collected through a data-mining process called *web-scrapping* has increasingly become the method of choice for researchers across disciplines. The term web-scrapping simply refers to the process of collecting structured data from websites using algorithms to automate the collection process. Methods similar to ones I have implemented in this thesis have been used by established authors such as **Borde et al., Pérez-Rave et al. and Berawi et al.** 
+
+In this thesis, I have used a mixture of the programming languages R and Python, supplemented by several packages created by Selenium, to write an algorithm that collects the required hedonic variables for this research from the Multiple Listing Services (MLS). **Table 1** is a summary of the original data set's key features.
+
+<br>
+
+```{r load-packages, include=FALSE}
+library(dplyr)
+library(magrittr)
+library(knitr)
+library(knitr)
+#library(kableExtra)
+library(readxl) # Import excel data frames
+library(tidyverse)
+library(dplyr)
+library(tinytex)
+library(readxl) # Import excel data frames
+library(ggplot2) # Graphs
+library(scales) # Scale range of ggplots 
+library(ggfortify) # Additional ggplot2 functionality
+library(olsrr) # Testing for heteroscedasticity
+library(lmtest) # Testing for heteroscedasticity using breuch-pagan
+library(sandwich) # Amending heteroskedasticity 
+library(mcvis) # Visualizing multicollinearity
+library(gridExtra) # Organize graphs
+library(dplyr) # data_factor wrangling
+library(tidyr) # data_factor wrangling
+library(tinytex) #for RMarkdown
+library(openxlsx) #Export data frame into Excel
+library(ggeffects) # plotting marginal effects
+library(sjPlot) # plotting marginal effects
+library(stargazer) # Showing several outputs next to each other in a STATA style
+library(modelsummary) # Showing several outputs next to each other in a STATA style
+library(regclass) # for testing multicollinearity using VIF
+library(jtools) # cleaner regression output (e.g. summ(lm) 
+library(tidyverse) # data cleaning
+library(hrbrthemes) # special boxplots
+library(viridis) # special boxplots
+library(plotly) # For 3D plotting in ggplot2
+library(reshape2) # Corr heatmap
+library(gt)
+
+
+#detach("package:kableExtra", unload=TRUE)
+#detach("package:knitr", unload=TRUE)
+
+# Import and attach data sets
+data_factor <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/3. data_factor_cleaned.xlsx")
+attach(data_factor)
+
+# Convert Char to Factors with N Levels
+# Structure Change
+data_factor$property_type <- as.factor(data_factor$property_type)
+data_factor$ac_type <- as.factor(data_factor$ac_type)
+data_factor$patio <- as.factor(data_factor$patio)
+data_factor$school_general <- as.factor(data_factor$school_general)
+data_factor$pool <- as.factor(data_factor$pool)
+data_factor$roof_type <- as.factor(data_factor$roof_type)
+data_factor$gas_type <- as.factor(data_factor$gas_type)
+data_factor$out_building <- as.factor(data_factor$out_building)
+data_factor$appliances <- as.factor(data_factor$appliances)
+data_factor$garage <- as.factor(data_factor$garage)
+data_factor$property_condition <- as.factor(data_factor$property_condition)
+data_factor$energy_efficient <- as.factor(data_factor$energy_efficient)
+data_factor$exterior_type <- as.factor(data_factor$exterior_type)
+data_factor$exterior_features <- as.factor(data_factor$exterior_features)
+data_factor$fireplace <- as.factor(data_factor$fireplace)
+data_factor$foundation_type <- as.factor(data_factor$foundation_type)
+data_factor$beds_total <- as.factor(data_factor$beds_total)
+data_factor$bath_full <- as.factor(data_factor$bath_full)
+data_factor$bath_half <- as.factor(data_factor$bath_half)
+data_factor$sewer_type <- as.factor(data_factor$sewer_type)
+data_factor$property_style <- as.factor(data_factor$property_style)
+data_factor$subdivision <- as.factor(data_factor$subdivision)
+data_factor$water_type <- as.factor(data_factor$water_type)
+data_factor$waterfront <- as.factor(data_factor$waterfront)
+data_factor$sold_date <- openxlsx::convertToDate(data_factor$sold_date)
+data_factor$sold_date <- as.numeric(data_factor$sold_date)
+
+str(data_factor)
+
+# Splits
+data_factor$city_limits <- as.factor(data_factor$city_limits)
+data_factor$corona_date_split <- as.factor(data_factor$corona_date_split)
+data_factor$top25_sold_price <- as.factor(data_factor$top25_sold_price)
+data_factor$bottom25_sold_price <- as.factor(data_factor$bottom25_sold_price)
+data_factor$top25_area_living <- as.factor(data_factor$top25_area_living)
+data_factor$bottom25_area_living  <- as.factor(data_factor$bottom25_area_living)
+data_factor$top25_age <- as.factor(data_factor$top25_age)
+data_factor$bottom25_age <- as.factor(data_factor$bottom25_age)
+data_factor$top25_dom <- as.factor(data_factor$top25_dom)
+data_factor$bottom25_dom <- as.factor(data_factor$bottom25_dom)
+data_factor$infections_period <- as.numeric(data_factor$infections_accum > 1000)
+data_factor$infections_period <- as.factor(data_factor$infections_period)
+
+str(data_factor)
+
+# Remove this weird '20' level is bath_full
+levels(data_factor$bath_full)
+is.na(data_factor$bath_full) <- data_factor$bath_full == "20"
+data_factor$bath_full <- factor(data_factor$bath_full)
+levels(data_factor$bath_full)
+
+# Remove beds_total > 5
+levels(data_factor$beds_total)
+is.na(data_factor$beds_total) <- data_factor$beds_total == "7" 
+data_factor$beds_total <- factor(data_factor$beds_total)
+is.na(data_factor$beds_total) <- data_factor$beds_total == "6" 
+data_factor$beds_total <- factor(data_factor$beds_total)
+levels(data_factor$beds_total)
+
+
+
+levels(data_factor$beds_total)
+levels(data_factor$bath_full)
+levels(data_factor$bath_half)
+
+# Data frame without Split Vars
+names(data_factor)
+data_factor_core <- data_factor[-c(36:47)]
+data_factor_core <- subset(data_factor_core, select = -c(city_limits, mls_number, infections_period))
+str(data_factor_core)
+names(data_factor_core)
+
+
+
+```
+
+```{r echo=FALSE, results='asis'}
+
+library(readxl) # Import excel data frames
+df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+df1 <- df1[,1:2]
+colnames(df1) <- c("Name", "Information")
+
+
+table1 <- gt(df1)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table1
+```
+<br>
+
+```{r echo=FALSE, results='asis'}
+# Table 2
+df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
+df2 <- df2[,1:3]
+colnames(df2) <- c("Variable Type", "Variables", "Observations")
+
+table2 <- gt(df2)
+table2 <- table2 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table2
+
+# Joining Code
+# Under construction
+
+```
+
+#### 3.2 Data Processing
+
+Though the data-collecting algorithms return structured data, it is nevertheless far from being suitable for the rather picky
+models which will eventually analyze them. Therefore, the following processes were completed in order to render the raw data
+into a usable form:
+
+1. **Missing values** (i.e. N/A values) were removed 
+2. **Outliers** were identified and removed for all continuous variables
+   + An 'outlier' is defined by being more than 1.5 standard deviations from the mean of the variable's own distribution
+3. **Multilevel factor** data was broken out by each level into binary representations through *Hot-One* coding
+   + Some features which had a large number of factor levels were simplified using Lasso regressive methods
+4. **High-leverage** point observations, according to diagnostic linear regression, were removed
+5. **Duplicates**, defined by the MLS unique identification number, were removed
+6. **Structural errors** (e.g. dates structured as string variable) were corrected
+7. **Binary variables** were created for key variables (e.g. city_limits) by the following standard method:
+
+$$I\left(y\right)=\left\{\begin{array}{ll}1,\quad x\in A\\0, \quad x \notin A\end{array}\right.,$$
+Where $I$ is an indicator function with space $A$ that composes dummy variable $x$ into $1$ if the condition is met and into $0$ if it is not.
+
+<br>
+
+The results of the data cleaning processes cane be seen in **table 2**.
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Set Summary
+df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+
+table1 <- gt(df1)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table1
+```
+
+<br>
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Structure Overview
+df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
+df2 <- df2 %>% select(1, 4:5)
+
+colnames(df2) <- c("Variable Type", "Variables", "Observations")
+
+table2 <- gt(df2)
+table2 <- table2 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table2
+
+```
+
+
+
+#### 3.3 Variable List
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Set Summary
+df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/Variable_table.xlsx"))
+
+table1 <- gt(df3)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+
+table1
+```
+
+<br><br>
+
+#### 3.3 Data Distriptive Statistics
+
+```{r include=FALSE}
+library(readxl) # Import excel data frames
+library(ggplot2) # Graphs
+library(scales) # Scale range of ggplots 
+library(ggfortify) # Additional ggplot2 functionality
+library(olsrr) # Testing for heteroscedasticity
+library(lmtest) # Testing for heteroscedasticity using breuch-pagan
+library(sandwich) # Amending heteroskedasticity 
+library(mcvis) # Visualizing multicollinearity
+library(gridExtra) # Organize graphs
+library(dplyr) # data_factor wrangling
+library(tidyr) # data_factor wrangling
+library(tinytex) #for RMarkdown
+library(openxlsx) #Export data frame into Excel
+library(ggeffects) # plotting marginal effects
+library(sjPlot) # plotting marginal effects
+library(stargazer) # Showing several outputs next to each other in a STATA style
+library(modelsummary) # Showing several outputs next to each other in a STATA style
+library(regclass) # for testing multicollinearity using VIF
+library(jtools) # cleaner regression output (e.g. summ(lm) 
+library(tidyverse) # data cleaning
+library(hrbrthemes) # special boxplots
+library(viridis) # special boxplots
+library(plotly) # For 3D plotting in ggplot2
+library(reshape2) # Corr heatmap
+
+# Colors
+very_low <- "#460f5c"
+low <- "#2c728e"
+med <- "#27ad81"
+high <- "#f4e61e"
+
+# Import and attach data sets
+# Upload and process data_factor from OLS_Thesis
+
+```
+
+##### 3.3.1 Correlation 
+
+The correlation matrix between all numeric variables shows that with exception to the variables which will have obvious correlations (e.g. sold_price and list_price, area_total and area_living, and infections figures), there are no other correlations which would cause concern.
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/correlation_matrix.png){width=80%}
+</center>
+
+<br>
+
+##### 3.3.2 Distributions of Select Variables
+As the standard descriptive characteristics of a particular variable are considered (i.e. measures of frequency, central tendency, dispersion, and position), the matrix of density plots below give us a good overview of the most relevant variables in this data set. 
+
+<br>
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Select_var_summary.png){width=100%}
+</center>
+
+##### 3.3.3 Price Index
+Under Construction
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=90%}
+</center>
+
+
+
+
+
+<br><br>
+
+### 4. Methodology
+The overarching method used in this thesis is the Hedonic Pricing Method (HPM), also often referred to as hedonic regression or hedonic demand theory. The fundamental theory behind the HPM is the following: commodities are distinguishable by their component parts, therefore, the market value of a given commodity can be calculated by summing the estimated values of its separate characteristics. For this theory to hold true, several critical requirement must be met. Primarily, that the commodity being valued can be reduced down to it's component parts and that the market is able to implicitly and independently value these characteristics. The fulfillment of these requirements are not obvious and in reality will in some measure fall short of accounting for the complete nature of price dynamics in practically every asset class. However, this limitation offers an interesting problem to test. Namely, to find the limit of the accumulated power of these component parts to account for market values and their deviations across time and subgroups. This exact questions will be later examined by implementing a machine-learned predictive model to measure the theoretical maximum explanatory power of the included hedonic variables. In the following two subsections, we review the methods used in this paper to econometrically model the HPM on hedonic real estate data.
+
+<br>
+
+#### 4.1 Multi-Variable Linear Regression 
+In this section, I will outline the construction of my base OLS model, termed the Alpha model, as well as the treatment process for heteroskadasticity, multicolinearity, non-linearity, and high-leverage points and outliers.  
+
+##### 4.1.1 Basic Model Design
+
+Following the OLS construction laid out by @Herath1:
+
+$$
+R = f(P,N,L,t)
+$$
+where $R$ is rent or price of the property; $P$ is property related attributes; $N$ is neighborhood characteristics; $L$ is locational variables and; $t$ is an indicator of time.
+
+This paper's base OLS model, named the Alpha model, is as follows:
+
+$$
+{Sold \ Price}_{t} = \ A \ + \  \ B_1 {hello}_1 \ + \  \ B_2 {hello}_2s
+$$
+
+$$
+{P}_{n\times1,t} = \ A_{n\times1,t} \ + \  \ B_1{P}_1 \ + \  \ B_2 {hello}_2s
+$$
+
+Where 
+
+$\ A$
+
+<br>
+
+##### 4.1.2 Accounting for Heteroscadasticity
+A Breusch-Pagan test was conducted on a standard linear regression model with sold price as the dependent variable and the rest of the dataset as regressors. The Breusch-Pagan (BP) test was established as a method in 1979 and follows the logic set by the Lagrange multiplier test principle [@Breusch]. This test tests the null hypothesis that the variance in the model's errors is independent from model's regressors (i.e. heteroscadasticity). The test's results in a rejections of the null hypothesis, thereby finding the base model to be heteroskedastic. The results of this test are summarized in *table x*.
+
+<br>
+
+```{r echo=FALSE}
+df <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/BP_Test.xlsx"))
+#df <- df[1,1]
+
+table1 <- gt(df)
+table1 <- table1 %>% tab_header(title = md("Breusch Paga Test for Heteroskedasticity"),
+                                subtitle = md("*Hypotheses*")) %>%
+                                tab_style(style = "padding-top:12px;padding-bottom:12px;",
+                                locations = cells_column_labels()) %>%
+                                tab_spanner(label = "Hypotheses",
+                                            columns = c(Hypotheses)) %>%
+                                tab_spanner(label = "Test Summary",
+                                            columns = c("Test Summary", "-"))
+table1
+```
+
+<br>
+
+To resolve the heteroskadasticity found in §3.4.1, I will produce heteroskedasticity-consistent (HC) standard errors, also known as heteroskedasticity-robust standard errors, through the refined method established by econometrician Halbert Lynn White [@White].This process is as follows:
+
+If the model's errors $u_{i}$ are independent, but have distinct variances $\sigma _{i}^{2}$ then $\Sigma =\operatorname{diag}(\sigma _{1}^{2},\ldots ,\sigma _{n}^{2})$ which can be estimated with ${\displaystyle {\widehat {\sigma }}_{i}^{2}={\widehat {u}}_{i}^{2}}$. This relationship produces the estimator found in @White:
+
+<br>
+
+$$ {\displaystyle {\begin{aligned}v_{\text{HCE}}\left[{\widehat {\beta }}_{\text{OLS}}\right]&={\frac {1}{n}}\left({\frac {1}{n}}\sum _{i}X_{i}X_{i}'\right)^{-1}\left({\frac {1}{n}}\sum _{i}X_{i}X_{i}'{\widehat {u}}_{i}^{2}\right)\left({\frac {1}{n}}\sum _{i}X_{i}X_{i}'\right)^{-1}\end{aligned}}}$$
+$${\displaystyle {\begin{aligned}&=(\mathbb {X} '\mathbb {X} )^{-1}(\mathbb {X} '\operatorname {diag} ({\widehat {u}}_{1}^{2},\ldots ,{\widehat {u}}_{n}^{2})\mathbb {X} )(\mathbb {X} '\mathbb {X} )^{-1},\end{aligned}}}$$
+
+<br>
+
+where $\mathbb{X}$ denotes the matrix of stacked $X_i'$ values from the data. The estimator can be derived in terms of the generalized method of moments (GMM).
+
+For the remainder of this thesis, all statements and figures regarding statistical significance will be referring to tests conducted with heteroskedasticity-consistent (HC) standard errors. As sample errors in my models will have equal variance and are uncorrelated, the least-squares estimates of each model's beta coefficients are regarded as Best Linear Unbiased Estimators (BLUEs).
+
+<br>
+
+##### 4.1.3 Accounting for Multicolinearity
+Multicolinearity is measured using Variance Inflation Factors (VIF). The VIF of a predictor measures how accurately that variable can be predicted using all other variables. For context, the square root of a VIF represents the increase in standard error of the estimated coefficient with respect to the case when that given variable is independent of all other variables. Inline with current convention, all variables with a VIF larger than 5 are eliminated. A graphical representation of all variable multicolinearity, measured by VIF, is shown in image x.
+
+This test resulted in the elimination of the variables ***list_price*** and ***area_total*** and there were highly multicolinear with ***sold_price*** and ***area_living*** respectively.
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Multi_colin/Multi_co_combined.png){width=80%}
+</center>
+
+<br>
+
+##### 4.1.4 Accounting for Non-linearities
+I visual analysis was conducted on all continuous variables and non-linear variables transformation were added to ***age*** and ***area_living***
+
+###### 4.1.4.1 Age
+An analysis of age vs. sold price shows a well-established u-shaped pattern. In order to allow the OLS model to better capture this relationship, a new variable $age^2$ is added to the model. 
+
+Image x shows the Partial Dependency Plot (PDP) of age within the Alpha model. This plots the marginal prediction of the Alpha model across the full range of age. When the scale of the y-axis is reduced, we see the slight curvature in Alpha model's estimation of age effects. This addition improved $R^2$ by $.08$. 
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/age.png){width=70%}
+</center>
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/age.fitted.png){width=70%}
+</center>
+
+###### 4.1.4.2 Living Area
+An analysis of living-area vs. sold price reveals a Sigmoid pattern between the two variables. In order to allow the OLS model to better capture this relationship, a new variable $living \ area^2$ is added to the model. 
+
+Image x shows the Partial Dependency Plot (PDP) of $living \ area^2$ within the Alpha model. This addition improved $R^2$ by $.06$.
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/living_area.png){width=70%}
+</center>
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_combined.png){width=70%}
+</center>
+
+##### 4.1.5 Accounting for High-Leverage Points and Outliers
+After the adjustments or the previous sections have been made, a panel of visualizations are run on the Alpha model. The results show no extreme outliers and only one high-leverage point (obs #23515), as shows by the residual vs. leverage plot in quadrant two of image X, which is removed in the final Alpha model. These results are mainly due to the previous removal of outliers in §3.2 and the overall quality of the data set. 
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/alpha_plots.png){width=70%}
+</center>
+
+##### 4.1.6 Final Alpha Model
+Under Construction
+
+The Alpha model is the baseline OLS for this thesis and is rebust to heteroskadasticity, multicolinearity, non-linearities, high-leverage points and outliers. These high-level adjustment increase our confidence in the statistical tests results which follow  
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Alpha_model_final.png){width=70%}
+</center>
+
+
+#### 4.3 Modeling Changes in Demand for Hedonic Features
+The focus of this thesis is how the Covid crisis impacted housing prices and the relative levels of demand for specific hedonic features. In the case where the HPM is in the OLS functional form, the beta coefficients of this model represent relative demand for each associated hedonic feature [@Shimizu]. For example, $\beta_{pool = 1} =11,856$ is interpreted as the average consumer's willingness to pay for an average pool, ceteris parabus. However, this thesis wishes to measure the *changes* in the average consumer's willingness to pay for a given feature (e.g. pool) in relationship a measurement of Covid's economic impact. 
+
+##### 4.3.1 Method of Comarison
+A method of statistically comparing changes in the beta coefficients of particular features of interest. To accomplish this, a method outlined by the UCLA Statistics department is implemented [@Bruin]. The best way to understand this method is to see a simplest repreducable example.
+
+Assume we want to test the economic impact of Corona on the relative demand, $\beta_{pool = 1}$, for swimming pools, $pool$. Using the UCLA method, we test the null hypothesis $H_0: \beta_{pool = 1,\ corona = 0} = \beta_{pool = 1,\ corona = 1}$ with the following OLS
+
+<br>
+
+$$
+{sold \ price} = \alpha \ + \beta_1 {pool} \ + \  \beta_2 {corona} \ + \beta_3 {(pool \times corona)}
+$$
+<br>
+
+Which results in the following:
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/UCLA_output_1.png){width=40%}
+</center>
+
+<br>
+
+The interpretation of this simplified model's estimates are:
+
+* Intercept: Intercept for $pool = 0$ 
+   + The omited group
+* pool: Slope for $pool = 1$
+   + The included group
+* infections period: $($Intercept $infections \ period = 1)$ $-$ $($intercept $infections \ period = 0)$
+   + This can be seen by running individual regressions for each case
+* (pool*infections period): Slope for $pool_{infections \ period = 1}$ $-$ $pool_{infections \ period = 0}$ 
+   + This estimate tests the null hypothesis $H_0: \beta_{pool = 1,\ corona = 0} = \beta_{pool = 1,\ corona = 1}$
+
+<br>
+
+Therefore, we say:
+
+> The average premium for a property having a **swimming pool** fell by **$7,766.40** when compared to pre-corona levels, ceteris parabus. However, this finding is only significant at the ***p < 0.10*** level.  
+
+<br>
+
+##### 4.3.2 Selecting a Corona Measurment
+A good measurement for the response of the market to the corona crisis must be a corona-related matric which is publicly available, common knowledge to the population, and is a reasonable measurment of future economic shifts. For this reason, data collected from the Louisiana Department of Health [@LaDH] was used to calculate the 3-month moving average of corona infections (infections_3mma).
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=60%}
+</center>
+
+<br>
+
+This measurement fulfills the previously stated requirements of a good test measurement as it is purely related to the corona crisis, is publicly available, is assumed to be publicly known as it is reported across all major news stations daily, and perhaps most importantly, is the primary metric used to decide when mandatory lockdowns are instituted. For this thesis, it is assume the market is responding to some lagged value of daily infections which are being used by consumers to estimate the likelihood of future lockdowns and the stringency, and duration of current lockdowns. With this rational, infections_3mma is selected as the primary measurement of corona's impact. 
+
+<br><br>
+
+#### 4.4 Machine Learning 
+
+##### 4.4.1 Machine Learning Methods
+
+In the previous subsection 4.1, it was stated that the multivariable regression models estimate a vector of parameters (i.e. beta coefficients) that best fit the explanatory hedonic variables to the associated dependent variable. Intuitively, the resulting fitted coefficient vector is fitted to the entire data set, and therefore, the loss function minimizes the error in the model's ability to *explain* the very independent variable it was fitted to. In other terms, these results are ultimately limited to their inferential value within the exact context of the data set the model is trained on. If one is to establish a wider, more general relationship between dependent and independent variables that go beyond the context of the trained data set, supervised machine learning (ML) prediction models are an extremely powerful tool to do so. Though the models used in this thesis differ across several key processes, they each generally follow a similar logic: 
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/ML_Process.png){width=70%}
+</center>
+
+<br>
+
+*Data Spliting and CV:*
+
+Data must first be split into 'test' and 'train' (validation) subsets. Each ML model will be fitted to the train data set and it's performance will be evaluated based the model's ability to predicted out-of-sample observations in the test (validation) data set. In this way, these models are ranked based on their test mean squared errors (MSE). This process is often referred to as Cross Validation (CV). The two most commonly used CV methods are the Validation Set Approach and K-Fold Cross Validation. 
+
+The Validation Set Approach (VSA) is the simplest case of cross validation data splitting as it simply randomly splits the entire data set into train and test subsets based on a certain percentage split. For example, the researcher can choose to split the data set with a 80% training and 20% testing split. The estimation for the test MSE is simply the test error against the test data set.
+
+<br>
+
+<center> *Test MSE Estimation Equation* </center>
+
+$$CV_{vsa} = MSE_{vsa}$$
+
+<br>
+
+<center>
+
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Val_Sets.png){width=50%}
+</center>
+
+<br>
+
+The K-Fold CV method has increasingly been used by researches as it offers a more comprehensive cross validation process when compared to other methods. K-Fold CV is the process of randomly splitting the entire data set into k groups, or folds, each with approximately an equal number of observations. The first fold is held out and the model is trained on the remaining k-1 folds. This process is repeated k times, each time holding out a different fold until every fold has been treated as the validation set. Finally, this will results in k estimations of the model's test error and the final estimation will be the average across all k model fits. 
+
+<br>
+
+<center> *Test MSE Estimation Equation* </center>
+
+$$CV_{k-fold} = \frac{1}{k}\sum_{t=1}^{k} MSE_i$$
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/K-Fold.png){width=50%}
+</center>
+
+<br>
+
+##### 4.4.2 Variable Selection 
+Now that a method of model fitting and evaluation has been established through Cross Validation, we now have a way to rank different models to each other based on their ability to estimate a true test MSE. With this extension, it is possible to test different combinations are available independent variables to search for the most accurate and least over-fitted model possible. The   
+
+<br>
+
+##### 4.4.2 Model Selection 
+Under Construction
+
+1. Accuracy
+2. Interpretability
+
+<br>
+
+##### 4.4.3 Extreme Gradient Boosting Machine
+The XGBoosting machine chosen and tuned for this thesis is programmed with the following algorithm: 
+
+1. Algorithm input: training set ${\displaystyle \{(x_{i},y_{i})\}_{i=1}^{N}}$, a differentiable loss function $L(y, F(x))$ a number of weak learners $M$ and a learning rate $\alpha$.
+
+
+2. Algorithm:
+
+2.1 Initialize model with a constant value:
+
+$${\displaystyle {\hat {f}}_{(0)}(x)={\underset {\theta }{\arg \min }}\sum _{i=1}^{N}L(y_{i},\theta )}$$
+
+<br>
+
+2.2 For $m = 1$ to $M$:
+
+2.2.1 Compute the 'gradients' and 'hessians
+$${\displaystyle {\hat {g}}_{m}(x_{i})=\left[{\frac {\partial L(y_{i},f(x_{i}))}{\partial f(x_{i})}}\right]_{f(x)={\hat {f}}_{(m-1)}(x)}.}$$
+$${\displaystyle {\hat {h}}_{m}(x_{i})=\left[{\frac {\partial ^{2}L(y_{i},f(x_{i}))}{\partial f(x_{i})^{2}}}\right]_{f(x)={\hat {f}}_{(m-1)}(x)}.}$$
+
+<br>
+
+2.2.2 Fit a base learner (or weak learner, e.g. tree) using the training set ${\displaystyle \displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the optimization problem:
+
+$${\displaystyle {\hat {\phi }}_{m}={\underset {\phi \in \mathbf {\Phi } }{\arg \min }}\sum _{i=1}^{N}{\frac {1}{2}}{\hat {h}}_{m}(x_{i})\left[-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}-\phi (x_{i})\right]^{2}.}$$
+
+$${\displaystyle {\hat {f}}_{m}(x)=\alpha {\hat {\phi }}_{m}(x).}$$
+
+<br>
+
+2.3 Update the model:
+$${\displaystyle {\hat {f}}_{(m)}(x)={\hat {f}}_{(m-1)}(x)+{\hat {f}}_{m}(x).}$$
+
+<br>
+
+3. Algorithm Output: 
+$${\displaystyle {\hat {f}}(x)={\hat {f}}_{(M)}(x)=\sum _{m=0}^{M}{\hat {f}}_{m}(x).}$$
+
+<br>
+
+##### 4.4.4 XGBoosting Hyperparameter Tuning
+
+
+##### 4.4.5 XGBoost Partial Dependency Plots
+
+
+
+<br><br>
+
+### 5. Results
+**Notes**
+
+1. Visual Guide of results
+2. Structure:
+   + Hypothesis construction and support
+   + Make clear test and results of hypothesis
+3. Make separate docs for subsections and variable analysis
+
+<br>
+
+#### 5.0 Hypothesis Construction
+
+#### 5.1 The Corona Crisis
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=50%}
+</center>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Accumulation_of_infections.png){width=50%}
+</center>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price.png){width=50%}
+</center>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price_violin.png){width=50%}
+</center>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=100%}
+</center>
+
+
+
+
+#### 5.2 Corona and Size
+##### 5.2.1 Property Size
+##### 5.2.2 Land Size
+
+#### 5.3 Corona and Number of Bedrooms
+
+#### 5.4 Corona and Age
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/age_infections_3d.png){width=60%}
+</center>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/heat_test.png){width=70%}
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/PDP_Test.png){width=60%}
+</center>
+
+
+</center>
+
+#### 5.5 Corona and Days on Market
+
+#### 5.6 Corona and City Limits
+
+#### 5.7 Corona and Other Features
+
+<br><br>
+
+### 6. Discussion
+
+<br><br>
+
+### 7. Conclusion
+
+<br><br>
+
+### 8. Bibliography
+
+<br><br>
+
+### 9. Appendix
+
+<br><br>
+
+#### General Notes and Todos
+ 
+ * Possibly write in LaTex?
+ * Just write cover letter in word and combine PDF?
+ * Complete general Structure
+ * Select system for managing references
+ * Get confirmation on title change from Prüfungsamt
+ * Possible additional data
+   + Include Covid cases in La by date?
+   + Crime stats?
+   + Racial Stats?
+ * Include the terms
+   + Big Data
+ * Build some graphics in pptx and import them as images
+ * Web scrapping for additional data sets?
+ * Graph with **DATE** as variable
+ * Make German study in German
+ * Replicate with other data sets
+ * Check for plagiarism 
+ * Make video explaining thesis for prof. grading
+
+#### Helpful Notes
+
+1. Define the central concepts used early on
+2. Start each chapter with a small introduction and end it with a brief summary of results
+3. Provide an outlook of the future developments of the particular scientific discussion, discuss policy implications and point out open questions.
+
+#### Playground
+
+```{r}
+library(gt)
+library(tidyverse)
+library(glue)
+
+# Define the start and end dates for the data range
+start_date <- "2010-06-07"
+end_date <- "2010-06-14"
+
+# Create a gt table based on preprocessed
+# `sp500` table data
+sp500 %>%
+  dplyr::filter(date >= start_date & date <= end_date) %>%
+  dplyr::select(-adj_close) %>%
+  gt() %>%
+  tab_header(
+    title = "S&P 500",
+    subtitle = glue::glue("{start_date} to {end_date}")
+  ) %>%
+  fmt_date(
+    columns = vars(date),
+    date_style = 3
+  ) %>%
+  fmt_currency(
+    columns = vars(open, high, low, close),
+    currency = "USD"
+  ) %>%
+  fmt_number(
+    columns = vars(volume),
+    suffixing = TRUE
+  )
+
+
+# Tables
+table1 <- gt(df3)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+
+table2 <- gt(df3)
+table2 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+
+# Combine 1 and 2
+data_tables <- data.frame(table_1 = table1, table_2 = table2)
+data_tables
+
+data_tables %>% 
+  gt() %>% 
+  fmt_markdown(columns = TRUE) %>% #render cell contents as html
+  cols_label(table_1.Count = "Table 1", 
+             table_2.Count = "Table 2")
+
+
+hp_table <- function(x){
+  gt(x) %>% 
+    data_color(columns = c("hp"), 
+               colors = col_numeric(palette = "Blues", 
+                                    domain = c(0, 400))) %>% 
+    tab_options(column_labels.hidden = TRUE) %>% 
+    as_raw_html() # return as html
+}
+
+
+
+```
+
+
+<br><br><br>
+
+End of Document
+
+
