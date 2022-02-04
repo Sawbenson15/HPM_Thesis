@@ -39,7 +39,7 @@ library(leaps) # Subset
 library(glmnet) #glmnet() is the main function in the glmnet package (must pass in an x matrix as well as a y vector)
 
 library(readxl)
-data_bi_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Github_Thesis_SMB/Models/Data/data_bi_clean_26.12.21.xlsx")
+data_bi_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/data_bi_clean_26.12.21.xlsx")
 
 # Remove linear dependencies
 data_bi_clean <- subset(data_bi_clean, select = -c(beds_total, school_general,

@@ -4,8 +4,10 @@ title: An Emperical Economic Investigation into COVID-19's Impact on Fundemental
 author: "Sawyer M. Benson"
 date: "December 21, 2021"
 output:
-  html_notebook: default
   word_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
   pdf_document: default
 bibliography: library.bib
 link-citations: yes
@@ -56,11 +58,9 @@ thesis is to investigate the reasons behind why and how real estate market price
 uncharacteristically counter cyclical in the face of a global pandemic.
 
 <br>
-
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
 </center>
-
 <br>
 
 In the following sections, I will apply the Hedonic Pricing Method (HPM) to Louisiana housing market data in order to inferentially describe the economic impact of the global pandemic on residential housing market values. Furthermore, I will take advantage of the HPM's structural framework of using real estate properties' hedonic features (e.g., size, age, number of bedrooms, etc.) to test for changes in demand for specific property features pre vs post pandemic. The HPM will be econometrically modeled using an Ordinary Least Squares (OLS) regressions framework for specific variable analysis while several variations of machine learning (ML) prediction models will be estimated to test different independent variables' maximum explanatory power in predicting out-of-sample observations. The results of these models will shed light into the otherwise counter intuitive response of real estate pricing dynamics to the COVID-19 global pandemic.    
@@ -194,7 +194,7 @@ library(gt)
 #detach("package:knitr", unload=TRUE)
 
 # Import and attach data sets
-data_factor <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/3. data_factor_cleaned.xlsx")
+data_factor <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/3. data_factor_cleaned.xlsx")
 attach(data_factor)
 
 # Convert Char to Factors with N Levels
@@ -207,6 +207,7 @@ data_factor$pool <- as.factor(data_factor$pool)
 data_factor$roof_type <- as.factor(data_factor$roof_type)
 data_factor$gas_type <- as.factor(data_factor$gas_type)
 data_factor$out_building <- as.factor(data_factor$out_building)
+
 data_factor$appliances <- as.factor(data_factor$appliances)
 data_factor$garage <- as.factor(data_factor$garage)
 data_factor$property_condition <- as.factor(data_factor$property_condition)
@@ -278,7 +279,7 @@ names(data_factor_core)
 ```{r echo=FALSE, results='asis'}
 
 library(readxl) # Import excel data frames
-df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
 df1 <- df1[,1:2]
 colnames(df1) <- c("Name", "Information")
 
@@ -292,7 +293,7 @@ table1
 
 ```{r echo=FALSE, results='asis'}
 # Table 2
-df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
+df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
 df2 <- df2[,1:3]
 colnames(df2) <- c("Variable Type", "Variables", "Observations")
 
@@ -331,7 +332,7 @@ The results of the data cleaning processes cane be seen in **table 2**.
 
 ```{r echo=FALSE, results='asis'}
 # Cleaned Data Set Summary
-df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
 
 table1 <- gt(df1)
 table1 <- table1 %>% tab_header(title = md("Variable List"),
@@ -343,7 +344,7 @@ table1
 
 ```{r echo=FALSE, results='asis'}
 # Cleaned Data Structure Overview
-df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
+df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
 df2 <- df2 %>% select(1, 4:5)
 
 colnames(df2) <- c("Variable Type", "Variables", "Observations")
@@ -361,7 +362,7 @@ table2
 
 ```{r echo=FALSE, results='asis'}
 # Cleaned Data Set Summary
-df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/Variable_table.xlsx"))
+df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Variable_table.xlsx"))
 
 table1 <- gt(df3)
 table1 <- table1 %>% tab_header(title = md("Variable List"),
@@ -418,7 +419,7 @@ The correlation matrix between all numeric variables shows that with exception t
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/correlation_matrix.png){width=80%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/correlation_matrix.png){width=80%}
 </center>
 
 <br>
@@ -428,17 +429,15 @@ As the standard descriptive characteristics of a particular variable are conside
 
 <br>
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Select_var_summary.png){width=100%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Select_var_summary.png){width=100%}
 </center>
 
 ##### 3.3.3 Price Index
 Under Construction
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=90%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=90%}
 </center>
-
-
 
 
 
@@ -464,16 +463,10 @@ where $R$ is rent or price of the property; $P$ is property related attributes; 
 This paper's base OLS model, named the Alpha model, is as follows:
 
 $$
-{Sold \ Price}_{t} = \ A \ + \  \ B_1 {hello}_1 \ + \  \ B_2 {hello}_2s
+{P}_{n\times1} = \ A_{n\times1} \ + \  B_{k\times1}{V}_{n\times k} \ +  \ \mathcal{E}_{n\times1}
 $$
 
-$$
-{P}_{n\times1,t} = \ A_{n\times1,t} \ + \  \ B_1{P}_1 \ + \  \ B_2 {hello}_2s
-$$
-
-Where 
-
-$\ A$
+where $P$ is a ${n\times1}$ vector of sold prices; $A$ is a ${n\times1}$ vector of the model's intercepts; $B$ is a ${k\times1}$ vector of beta coefficients; $V$ is a ${n\times k}$ matrix of all hedonic variables; $\mathcal{E}$ is a ${n\times1}$ vector of the model's random error; subscript $n$ is the number of observations and; $k$ is the length of the variable list.
 
 <br>
 
@@ -483,7 +476,7 @@ A Breusch-Pagan test was conducted on a standard linear regression model with so
 <br>
 
 ```{r echo=FALSE}
-df <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Tables/BP_Test.xlsx"))
+df <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/BP_Test.xlsx"))
 #df <- df[1,1]
 
 table1 <- gt(df)
@@ -525,7 +518,7 @@ This test resulted in the elimination of the variables ***list_price*** and ***a
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Multi_colin/Multi_co_combined.png){width=80%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Multi_colin/Multi_co_combined.png){width=80%}
 </center>
 
 <br>
@@ -539,10 +532,10 @@ An analysis of age vs. sold price shows a well-established u-shaped pattern. In 
 Image x shows the Partial Dependency Plot (PDP) of age within the Alpha model. This plots the marginal prediction of the Alpha model across the full range of age. When the scale of the y-axis is reduced, we see the slight curvature in Alpha model's estimation of age effects. This addition improved $R^2$ by $.08$. 
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/age.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age.png){width=70%}
 </center>
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/age.fitted.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age.fitted.png){width=70%}
 </center>
 
 ###### 4.1.4.2 Living Area
@@ -551,17 +544,17 @@ An analysis of living-area vs. sold price reveals a Sigmoid pattern between the 
 Image x shows the Partial Dependency Plot (PDP) of $living \ area^2$ within the Alpha model. This addition improved $R^2$ by $.06$.
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/living_area.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area.png){width=70%}
 </center>
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_combined.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_combined.png){width=70%}
 </center>
 
 ##### 4.1.5 Accounting for High-Leverage Points and Outliers
 After the adjustments or the previous sections have been made, a panel of visualizations are run on the Alpha model. The results show no extreme outliers and only one high-leverage point (obs #23515), as shows by the residual vs. leverage plot in quadrant two of image X, which is removed in the final Alpha model. These results are mainly due to the previous removal of outliers in §3.2 and the overall quality of the data set. 
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/alpha_plots.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/alpha_plots.png){width=70%}
 </center>
 
 ##### 4.1.6 Final Alpha Model
@@ -570,17 +563,17 @@ Under Construction
 The Alpha model is the baseline OLS for this thesis and is rebust to heteroskadasticity, multicolinearity, non-linearities, high-leverage points and outliers. These high-level adjustment increase our confidence in the statistical tests results which follow  
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Alpha_model_final.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Alpha_model_final.png){width=70%}
 </center>
 
 
 #### 4.3 Modeling Changes in Demand for Hedonic Features
 The focus of this thesis is how the Covid crisis impacted housing prices and the relative levels of demand for specific hedonic features. In the case where the HPM is in the OLS functional form, the beta coefficients of this model represent relative demand for each associated hedonic feature [@Shimizu]. For example, $\beta_{pool = 1} =11,856$ is interpreted as the average consumer's willingness to pay for an average pool, ceteris parabus. However, this thesis wishes to measure the *changes* in the average consumer's willingness to pay for a given feature (e.g. pool) in relationship a measurement of Covid's economic impact. 
 
-##### 4.3.1 Method of Comarison
-A method of statistically comparing changes in the beta coefficients of particular features of interest. To accomplish this, a method outlined by the UCLA Statistics department is implemented [@Bruin]. The best way to understand this method is to see a simplest repreducable example.
+##### 4.3.1 Comparison Method
+A method of statistically comparing changes in the beta coefficients of particular features of interest under multiple scenarios (e.g. post and pre-corona period) is needed. To accomplish this, a method outlined by the UCLA Statistics department is implemented [@Bruin]. The best way to understand this method is to see a simplest reproducible example.
 
-Assume we want to test the economic impact of Corona on the relative demand, $\beta_{pool = 1}$, for swimming pools, $pool$. Using the UCLA method, we test the null hypothesis $H_0: \beta_{pool = 1,\ corona = 0} = \beta_{pool = 1,\ corona = 1}$ with the following OLS
+Suppose we want to test the economic impact of Corona on the relative demand for swimming pools, $\beta_{pool = 1}$ and $pool$ respectively. Using the UCLA method, we test the null hypothesis $H_0:\beta_{pool = 1,\ corona = 0} = \beta_{pool = 1,\ corona = 1}$ with the following OLS
 
 <br>
 
@@ -594,7 +587,7 @@ Which results in the following:
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/UCLA_output_1.png){width=40%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/UCLA_output_1.png){width=50%}
 </center>
 
 <br>
@@ -619,12 +612,12 @@ Therefore, we say:
 <br>
 
 ##### 4.3.2 Selecting a Corona Measurment
-A good measurement for the response of the market to the corona crisis must be a corona-related matric which is publicly available, common knowledge to the population, and is a reasonable measurment of future economic shifts. For this reason, data collected from the Louisiana Department of Health [@LaDH] was used to calculate the 3-month moving average of corona infections (infections_3mma).
+A good measurement variable for measuring the response of the market to the corona crisis must be a corona-related matric which is publicly available; common knowledge to the population and; is a reasonable measurement of future economic shifts. For this reason, data collected from the Louisiana Department of Health [@LaDH] was used to calculate the 3-month moving average of corona infections (infections_3mma).
 
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=60%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=60%}
 </center>
 
 <br>
@@ -642,16 +635,16 @@ In the previous subsection 4.1, it was stated that the multivariable regression 
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/ML_Process.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/ML_Process.png){width=70%}
 </center>
 
 <br>
 
-*Data Spliting and CV:*
+##### 4.4.2 Model Evaluation with Cross-Validation
 
-Data must first be split into 'test' and 'train' (validation) subsets. Each ML model will be fitted to the train data set and it's performance will be evaluated based the model's ability to predicted out-of-sample observations in the test (validation) data set. In this way, these models are ranked based on their test mean squared errors (MSE). This process is often referred to as Cross Validation (CV). The two most commonly used CV methods are the Validation Set Approach and K-Fold Cross Validation. 
+In order to rank order models, we perform a process called Cross-Validation (CV). First, the full data set must be split into 'test' and 'train' (i.e. validation) subsets. Each ML model will be fitted to the train data set and it's performance will be evaluated based the model's ability to predicted out-of-sample observations in the test (validation) data set. In this way, these models are ranked based on their test mean squared errors (MSE). This process is often referred to as Cross Validation (CV). The two most commonly used CV methods are the Validation Set Approach and K-Fold Cross Validation. 
 
-The Validation Set Approach (VSA) is the simplest case of cross validation data splitting as it simply randomly splits the entire data set into train and test subsets based on a certain percentage split. For example, the researcher can choose to split the data set with a 80% training and 20% testing split. The estimation for the test MSE is simply the test error against the test data set.
+The Validation Set Approach (VSA) is the simplest case of cross validation data splitting as it randomly splits the entire data set into train and test subsets based on a certain percentage split. For example, the researcher can choose to split the data set with a 80% training and 20% testing split. The estimation for the test MSE is simply the test error against the test data set.
 
 <br>
 
@@ -663,7 +656,7 @@ $$CV_{vsa} = MSE_{vsa}$$
 
 <center>
 
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Val_Sets.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Val_Sets.png){width=50%}
 </center>
 
 <br>
@@ -679,25 +672,37 @@ $$CV_{k-fold} = \frac{1}{k}\sum_{t=1}^{k} MSE_i$$
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/K-Fold.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/K-Fold.png){width=50%}
 </center>
 
 <br>
 
-##### 4.4.2 Variable Selection 
-Now that a method of model fitting and evaluation has been established through Cross Validation, we now have a way to rank different models to each other based on their ability to estimate a true test MSE. With this extension, it is possible to test different combinations are available independent variables to search for the most accurate and least over-fitted model possible. The   
+##### 4.4.4 Model Selection 
+For this thesis, ML models will be ranked based on two features: Accuracy, as measured by test MSE, and interpretability, qualitatively defined by the model's ability to provide insights into to which features are relevant to the ability to make correct predictions, and by how much are they relevant.
+
+Accuracy: Since a method of model fitting and evaluation has been established in the previous section through the process of Cross Validation, we now have a way to rank different models to each other based on their ability to estimate test MSE. With this feature, it is possible to compare several models to one another in terms of effectiveness in predictions. Four different ML models were build for this theis with the following results:
 
 <br>
 
-##### 4.4.2 Model Selection 
-Under Construction
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Set Summary
+df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/ML_Results.xlsx"))
 
-1. Accuracy
-2. Interpretability
+table1 <- gt(df3)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+
+table1
+```
 
 <br>
 
-##### 4.4.3 Extreme Gradient Boosting Machine
+Interpretability: A major critisim of ML models are their lack of interpretabilty of *how* the model makes such accurate predictions. A prime example of this critique can be seen in Artificial Neural Networks (ANN), which use a large number of small nodes to generate a single prediction without any one of these nodes holding a clear interpretation as to which variables, or combination of variables, lead to a particular improvement. As ML methods become increasingly popular, the demand for interpretation of these mode 
+
+
+<br>
+
+##### 4.4.5 Extreme Gradient Boosting Machine
 The XGBoosting machine chosen and tuned for this thesis is programmed with the following algorithm: 
 
 1. Algorithm input: training set ${\displaystyle \{(x_{i},y_{i})\}_{i=1}^{N}}$, a differentiable loss function $L(y, F(x))$ a number of weak learners $M$ and a learning rate $\alpha$.
@@ -737,10 +742,10 @@ $${\displaystyle {\hat {f}}(x)={\hat {f}}_{(M)}(x)=\sum _{m=0}^{M}{\hat {f}}_{m}
 
 <br>
 
-##### 4.4.4 XGBoosting Hyperparameter Tuning
+##### 4.4.6 XGBoosting Hyperparameter Tuning
 
 
-##### 4.4.5 XGBoost Partial Dependency Plots
+##### 4.4.7 XGBoost Partial Dependency Plots
 
 
 
@@ -761,23 +766,23 @@ $${\displaystyle {\hat {f}}(x)={\hat {f}}_{(M)}(x)=\sum _{m=0}^{M}{\hat {f}}_{m}
 
 #### 5.1 The Corona Crisis
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=50%}
 </center>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Accumulation_of_infections.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Accumulation_of_infections.png){width=50%}
 </center>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price.png){width=50%}
 </center>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price_violin.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price_violin.png){width=50%}
 </center>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=100%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=100%}
 </center>
 
 
@@ -791,13 +796,13 @@ $${\displaystyle {\hat {f}}(x)={\hat {f}}_{(M)}(x)=\sum _{m=0}^{M}{\hat {f}}_{m}
 
 #### 5.4 Corona and Age
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/age_infections_3d.png){width=60%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/age_infections_3d.png){width=60%}
 </center>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/heat_test.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/heat_test.png){width=70%}
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Writing & Literature/Graphics from pptx/PDP_Test.png){width=60%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/PDP_Test.png){width=60%}
 </center>
 
 
