@@ -29,7 +29,7 @@ Read in Data
 ```{r}
 # Read in data
 library(readxl)
-data_gbm_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/3. data_factor_cleaned.xlsx")
+data_gbm_clean <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/3. data_factor_cleaned.xlsx")
 
 # Structure Change
 data_gbm_clean$property_type <- as.factor(data_gbm_clean$property_type)
@@ -356,6 +356,10 @@ ice <- xgb.fit.final %>%
   scale_y_continuous(labels = scales::dollar) +
   ggtitle("ICE")
 
+
+ice
+pdp
+
 gridExtra::grid.arrange(pdp, ice, nrow = 2)
 
 stopCluster(cl)
@@ -455,6 +459,10 @@ ice <- xgb.fit.final %>%
   autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
   scale_y_continuous(labels = scales::dollar) +
   ggtitle("ICE")
+
+
+pdp
+ice
 
 gridExtra::grid.arrange(pdp, ice, nrow = 2)
 

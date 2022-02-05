@@ -41,7 +41,7 @@ library(viridis) # special boxplots
 library(plotly) # For 3D plotting in ggplot2
 
 # Import and attach data sets
-data_factor <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/3. data_factor_cleaned.xlsx")
+data_factor <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/3. data_factor_cleaned.xlsx")
 attach(data_factor)
 
 # Convert Char to Factors with N Levels
@@ -118,6 +118,11 @@ data_factor_core <- subset(data_factor_core, select = -c(city_limits, mls_number
 str(data_factor_core)
 names(data_factor_core)
 
+# Define Colors
+very_low <- "#460f5c"
+low <- "#2c728e"
+med <- "#27ad81"
+high <- "#f4e61e"
 
 ```
 
@@ -412,7 +417,7 @@ plot_grid(p1, p2, p3)
 # - Area_total
 # - Listing price
 
-par(mfrow = (2,2))
+par(mfrow = c(2,2))
 
 data_factor_core_clean <- subset(data_factor_core_clean, select = -c(area_total, list_price))
 ```
@@ -442,15 +447,10 @@ coeftest(lm_alpha, vcov = vcovHC(lm_alpha, method = "White2", type = "HC0"))
 par(mfrow = c(2,2))
 plot(lm_alpha)
 
-
-
-
-install.packages("gtsummary")
-library(gtsummary)
-
-select()
-
-gtsummary::tbl_regression(lm_alpha, exponentiate = TRUE)
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+tab_model(lm_alpha, ci_method = "wald")
+stopCluster(cl)
 
 ```
 
@@ -464,8 +464,8 @@ gtsummary::tbl_regression(lm_alpha, exponentiate = TRUE)
 
 # Waves of infection
 ggplot(data_factor, aes(x = as.Date(sold_date), y = infections_3mma)) + 
-    geom_point(color = "grey35") + 
-    geom_smooth(linetype = "dashed", color = "gray46") +
+    geom_point(color = low, alpha = 0.7) + 
+    geom_smooth(linetype = "dashed", color = med) +
     theme_minimal() +
     scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
     scale_y_continuous(limits = c(0,max(infections_3mma))) +
@@ -477,20 +477,20 @@ ggplot(data_factor, aes(x = as.Date(sold_date), y = infections_3mma)) +
 
 # Accumulation of infections
 ggplot(data_factor, aes(x = as.Date(sold_date), y = I(infections_accum/1000))) + 
-    geom_point(color = "grey35") + 
-    geom_smooth(linetype = "dashed", color = "gray46") +
+    geom_point(color = low, alpha = 0.7) + 
+    geom_smooth(linetype = "dashed", color = med) +
     theme_minimal() +
     scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
     scale_y_continuous(limits = c(0,max(I(infections_accum/1000)))) +
     xlab(" ") +
-    ylab("Accumulation of Infections (in 000's") +
+    ylab("Accumulation of Infections (in 000's)") +
     labs(title = "Accumulation of Infections",
          caption = "")
 
 # Infections and home prices
 ggplot(data_factor, aes(x = I(infections_3mma/1000), y = sold_price)) + 
     #geom_point() + 
-    geom_smooth(linetype = "dashed", color = "gray46") +
+    geom_smooth(linetype = "dashed", color = med) +
     theme_minimal() +
     scale_x_continuous( limits = c(0,max(I(infections_3mma/1000)))) +
     xlab("3-Month Moving Average of Daily Infections (in 000's)") +
@@ -498,26 +498,26 @@ ggplot(data_factor, aes(x = I(infections_3mma/1000), y = sold_price)) +
     labs(title = "Infections and Price",
          caption = "")
 
-#Price on Infections
-very_low <- "#460f5c"
-low <- "#2c728e"
-med <- "#27ad81"
-high <- "#f4e61e"
+
 
 # "#ff6c67", "#00c2c6"
 
-ggplot(data_factor, aes(x = infections_period, y = sold_price, fill = infections_period)) +
+ggplot(data_factor, aes(x = infections_period, y = sold_price/1000, fill = infections_period)) +
     geom_violin(alpha = 0.5) +
     geom_boxplot(width=0.1) +
     scale_fill_viridis(discrete = TRUE, alpha=0.6, option="D") +
     coord_flip() +
     theme_ipsum() +
     theme(
-      legend.position="none",
-      plot.title = element_text(size=11)) +
-    ggtitle("Comparison of Sold Price") +
+      legend.position="none") +
     xlab("Infections Present (1 = yes)") +
-    scale_fill_manual(values=c(ver, med))
+    ylab("Sold Price (in 000's)") +
+    scale_fill_manual(values=c(very_low, med)) +
+    labs(title = "Comparison of Sold Price",
+         caption = "")
+
+
+
 ```
 
 <br><br>
