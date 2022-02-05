@@ -617,7 +617,7 @@ A good measurement variable for measuring the response of the market to the coro
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=60%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infect_combined.png){width=99%}
 </center>
 
 <br>
@@ -680,7 +680,9 @@ $$CV_{k-fold} = \frac{1}{k}\sum_{t=1}^{k} MSE_i$$
 ##### 4.4.4 Model Selection 
 For this thesis, ML models will be ranked based on two features: Accuracy, as measured by test MSE, and interpretability, qualitatively defined by the model's ability to provide insights into to which features are relevant to the ability to make correct predictions, and by how much are they relevant.
 
-Accuracy: Since a method of model fitting and evaluation has been established in the previous section through the process of Cross Validation, we now have a way to rank different models to each other based on their ability to estimate test MSE. With this feature, it is possible to compare several models to one another in terms of effectiveness in predictions. Four different ML models were build for this theis with the following results:
+*Accuracy*
+
+Since a method of model fitting and evaluation has been established in the previous section through the process of Cross Validation, we now have a way to rank different models to each other based on their ability to estimate test MSE. With this feature, it is possible to compare several models to one another in terms of effectiveness in predictions. Five different ML models were build for this thesis with the following results:
 
 <br>
 
@@ -697,15 +699,22 @@ table1
 
 <br>
 
-Interpretability: A major critisim of ML models are their lack of interpretabilty of *how* the model makes such accurate predictions. A prime example of this critique can be seen in Artificial Neural Networks (ANN), which use a large number of small nodes to generate a single prediction without any one of these nodes holding a clear interpretation as to which variables, or combination of variables, lead to a particular improvement. As ML methods become increasingly popular, the demand for interpretation of these mode 
+*Interpretability*
+
+A major criticism of ML models are their lack of interpretabilty, explaining *how* the model makes such accurate predictions. A prime example of this critique can be seen in Artificial Neural Networks (ANN) machines, which often use a large number of small nodes to sequentially generate a single prediction without any one of these nodes holding a clear interpretation as to which variables, or combination of variables, lead to a particular improvement in prediction. However, as ML methods become more commonly used, the demand for interpretation of these models has driven several useful interpretation methods across for a variety of models. These methods include interpretation for a single prediction, such as the Local Interpretable Model-agnostic Explanations (LIME), as well as generalized methods of measuring relative feature importance, which uses various techniques to determine the average contribution of each variable to the model's ability to decrease its test MSE rate. 
+
+
+Of the models sampled, the eXtreme Gradient Boosting Machine, also referred to as XGBoost, outperforms the other models both in terms of having the lowest test MSE and having the best methods for detailed variable interpretation. For this reason, XGBoost is chosen as the primary ML model for this thesis 
 
 
 <br>
 
-##### 4.4.5 Extreme Gradient Boosting Machine
-The XGBoosting machine chosen and tuned for this thesis is programmed with the following algorithm: 
+##### 4.4.5 eXtreme Gradient Boosting Machine Algorithm
+In order to understand the logic of XGBoost, one must first look at the compact, yet powerful algorithm behind its computation. In this section, I will lay out the mathematical formulation of the input, core algorithm, and final output of the XGBoost machine.
 
-1. Algorithm input: training set ${\displaystyle \{(x_{i},y_{i})\}_{i=1}^{N}}$, a differentiable loss function $L(y, F(x))$ a number of weak learners $M$ and a learning rate $\alpha$.
+<br>
+
+1. Algorithm input: We start with a training set ${\displaystyle \{(x_{i},y_{i})\}_{i=1}^{N}}$, a differentiable loss function $L(y, F(x))$, a number of weak learners (shallow trees) $M$, and a learning rate $\alpha$.
 
 
 2. Algorithm:
@@ -719,14 +728,14 @@ $${\displaystyle {\hat {f}}_{(0)}(x)={\underset {\theta }{\arg \min }}\sum _{i=1
 2.2 For $m = 1$ to $M$:
 
 2.2.1 Compute the 'gradients' and 'hessians
-$${\displaystyle {\hat {g}}_{m}(x_{i})=\left[{\frac {\partial L(y_{i},f(x_{i}))}{\partial f(x_{i})}}\right]_{f(x)={\hat {f}}_{(m-1)}(x)}.}$$
-$${\displaystyle {\hat {h}}_{m}(x_{i})=\left[{\frac {\partial ^{2}L(y_{i},f(x_{i}))}{\partial f(x_{i})^{2}}}\right]_{f(x)={\hat {f}}_{(m-1)}(x)}.}$$
+$${\displaystyle {\hat {g}}_{m}(x_{i})=\left[{\frac {\partial L(y_{i},f(x_{i}))}{\partial f(x_{i})}}\right]_{f(x)={\hat {f}}_{(m-1)}(x)}}$$
+$${\displaystyle {\hat {h}}_{m}(x_{i})=\left[{\frac {\partial ^{2}L(y_{i},f(x_{i}))}{\partial f(x_{i})^{2}}}\right]_{f(x)={\hat {f}}_{(m-1)}(x)}}$$
 
 <br>
 
-2.2.2 Fit a base learner (or weak learner, e.g. tree) using the training set ${\displaystyle \displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the optimization problem:
+2.2.2 Fit an original weak learner (e.g. shallow tree) using the training set ${\displaystyle \displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the following optimization problem:
 
-$${\displaystyle {\hat {\phi }}_{m}={\underset {\phi \in \mathbf {\Phi } }{\arg \min }}\sum _{i=1}^{N}{\frac {1}{2}}{\hat {h}}_{m}(x_{i})\left[-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}-\phi (x_{i})\right]^{2}.}$$
+$${\displaystyle {\hat {\phi }}_{m}={\underset {\phi \in \mathbf {\Phi } }{\arg \min }}\sum _{i=1}^{N}{\frac {1}{2}}{\hat {h}}_{m}(x_{i})\left[-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}-\phi (x_{i})\right]^{2}}$$
 
 $${\displaystyle {\hat {f}}_{m}(x)=\alpha {\hat {\phi }}_{m}(x).}$$
 
@@ -738,85 +747,171 @@ $${\displaystyle {\hat {f}}_{(m)}(x)={\hat {f}}_{(m-1)}(x)+{\hat {f}}_{m}(x).}$$
 <br>
 
 3. Algorithm Output: 
-$${\displaystyle {\hat {f}}(x)={\hat {f}}_{(M)}(x)=\sum _{m=0}^{M}{\hat {f}}_{m}(x).}$$
+$${\displaystyle {\hat {f}}(x)={\hat {f}}_{(M)}(x)=\sum _{m=0}^{M}{\hat {f}}_{m}(x)}$$
 
 <br>
 
-##### 4.4.6 XGBoosting Hyperparameter Tuning
+##### 4.4.6 XGBoost Model Fitting and Hyperparameter Tuning
+In practice, when attempting to produce the most optimal results from an XGBoost machine, as is true with most other ML models, one must first transform the data set into an optimal form and then run set of hyperparameter tests to determine the appropriate level for each of the model's basic structural rules (i.e. hyperparameters).
 
+Since the XGBoost machine requires only numerical data, factor data must be converted into numerical levels which can be the used in the construction of decision trees. To accomplish this with the added complexity of some factor variables having more than two levels, I have used a method called *One-Hot Encoding*, which encodes each individual factor variable level into a vector containing '1' if that factor and level are present, and '0' if it is not. In this way, the dataframe is converted into a large matrix of continuous and binary columns.
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/One-Hot_Encoding.png){width=90%}
+</center>
+
+<br>
+
+Once the model is fitted to the data, the next procedure is to tune the hyperparameters which govern the algorithm's learning process and therefore determine the resulting values of estimated parameters. To do this, a large grid of hyperparameters is created and then an individual model containing each unique combination of hyperparameter levels is generated and their resulting test MSE's are ranked and analyzed. The results from this large grid search determin which combination of hyperparameters are optimal, and those hyperparameters are used in the final model.
+
+<br>
 
 ##### 4.4.7 XGBoost Partial Dependency Plots
 
+Partial dependency plots (PDP) shows relationship, or dependence, between the model's response variable (i.e. $sold \ price$) and a chosen variable, or set of variables, of interests (VoI), resulting in the graphical representation of a variables marginal contribution to the machine's prediction across the variable of interest's entire range. In order to analyze the results of the XGBoost machine at the variable-by-variable level, I have generate a panel of four graphical partial dependency plots for each variable of interest. Thesis will be the following: Basic PDP plot, Individual Conditional Expectation (ICE) plots, PDP heatmap with VoI against corona infection, 3-dimensional PDP heatmap with VoI against corona infection. 
 
-
-<br><br>
-
-### 5. Results
-**Notes**
-
-1. Visual Guide of results
-2. Structure:
-   + Hypothesis construction and support
-   + Make clear test and results of hypothesis
-3. Make separate docs for subsections and variable analysis
+Image XX shows an example of each graph 
 
 <br>
 
-#### 5.0 Hypothesis Construction
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
-#### 5.1 The Corona Crisis
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Waves_of_infections.png){width=50%}
-</center>
+library(cowplot)
+library(ggplot2)
 
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Accumulation_of_infections.png){width=50%}
-</center>
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/PDP_Example.png", scale = 1)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/ICE_Example.png", scale = 1)
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/heat_test.png", scale = 1)
+p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/3D_Example.png", scale = 1)
 
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price.png){width=50%}
-</center>
+plot_grid(p1, p2, p3, p4)
 
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Infections_and_price_violin.png){width=50%}
-</center>
-
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=100%}
-</center>
-
-
-
-
-#### 5.2 Corona and Size
-##### 5.2.1 Property Size
-##### 5.2.2 Land Size
-
-#### 5.3 Corona and Number of Bedrooms
-
-#### 5.4 Corona and Age
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/age_infections_3d.png){width=60%}
-</center>
-
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/heat_test.png){width=70%}
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/PDP_Test.png){width=60%}
-</center>
-
-
-</center>
-
-#### 5.5 Corona and Days on Market
-
-#### 5.6 Corona and City Limits
-
-#### 5.7 Corona and Other Features
+``` 
 
 <br><br>
 
-### 6. Discussion
+### 5. Hypothesis Construction
+
+#### 5.1 Covid-19: General Case
+> **Hypothesis I:** The Covid-19 crisis significantly increased housing prices
+>
+> **Reasoning:** As many workers have perminantly shifted to remote work, the total utility of residential housing has increased, thereby increasing the price households are willing to pay. This price shift can be explained through measuring the changes if relative demand for specific hedonic features, such as bedrooms, size, age, and others. 
+
+<br>
+
+#### 5.2 Covid-19: Premium for Bedrooms
+> **Hypothesis II:** The Covid-19 crisis significantly increased demand-premiums for every level of bedrooms 
+>
+> **Reasoning:** As many workers have perminantly shifted to remote work, the premium for an additional bedroom is expected to increase across each level of total_beds as households need additional rooms for homeoffices and other activities.  
+
+<br>
+
+#### 5.3 Covid-19: Premium for City Centrality
+> **Hypothesis III:** The Covid-19 crisis impacted properties within city limits more than those not within city limits  
+>
+> **Reasoning:** As workers who live in city limits have jobs more likely to be compateble with remote work, such as jobs within the financial industry, home prices within city limits are disproporsionatly impacted by the shift to remote work.
+
+<br>
+
+#### 5.4 Covid-19: Premium for Relative Price Levels 
+> **Hypothesis III:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
+>
+> **Reasoning:** Households who live in the top 25th percentile of home prices are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium willing to pay for additonal hedonic features.  
+
+<br>
+
+#### 5.5 Covid-19: Premium for Size
+
+> **Hypothesis III:** The Covid-19 crisis increased the premium for property size 
+>
+> **Reasoning:** Same as for hypothesis I
+
+<br>
+
+> **Hypothesis IV:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
+>
+> **Reasoning:** Households who live in the top 25th percentile of home sizes are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium they are willing to pay for additonal hedonic features.
+
+<br>
+
+#### 5.6 Covid-19: Premium for Age 
+
+> **Hypothesis V:** The Covid-19 crisis increased the premium for property age 
+>
+> **Reasoning:** As the volocity of home sales increase, the general relationship between property age and price is expected to be exasterbated as those upgrading houses will shit towards newer properties
+
+<br>
+
+> **Hypothesis VI:** The Covid-19 crisis impacted properties in the top 25th percentile of age more than the bottom 25th percentile  
+>
+> **Reasoning:** The premium for the youngest (i.e. newest) properties is expected to increase while the premium for the oldest properties is expected to decrease. As the market shifts towards newer properties, they must necissarily shift away from older properties.
+
+<br>
+
+#### 5.7 Covid-19: Change in Days on Market
+
+> **Hypothesis V:** The Covid-19 crisis significantly impacted the premium for days on market 
+>
+> **Reasoning:** As the volocity of home sales increase, more homes are sold faster, and therefore the number of days on the market becomes less of a predictor of quality since even lower quality and over-priced homes are sold more quickly. 
+
+<br>
+
+> **Hypothesis III:** The Covid-19 crisis impacted properties in the top 25th percentile of days on market more than the bottom 25th percentile 
+>
+> **Reasoning:** The premium for a property being sold within the top 25th percentile of days on market (DOM), i.e. the properties which sit on the market the logest, is expected to be disproportionately effected when compared homes which sold the fastest, as households elasticity of demand for specific characteristics decreses relative to price, it will take larger deviation in price and quality to make a home sell in the top 25th percentile of DOM 
+
+
+
+<br><br>
+
+### 6. Results
+There will be a clear and consistant structure for each subsection of results. Each hypothesis will have: 
+
+* A *general overview* of the characteristic being modeled
+  + This is to give the reader a clear understanding of the feature being modeled in terms of frequency, central tendency, and key relationships to time, infection rates, and other features wich may be relevant
+* Model results with standard hypothesis conclusion(s) 
+
+<br>
+
+#### 6.1 Covid-19: General Case
+#### 6.1.1 Visual Review
+
+As in 
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+
+library(cowplot)
+library(ggplot2)
+
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Waves_of_infection.png", scale = 1)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Accumulation_of_infections.png", scale = 1)
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infections_and_Price.png", scale = 1)
+p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infection_period_price_dist_.png", scale = 1)
+
+plot_grid(p1, p2, p3, p4)
+
+``` 
+
+<br>
+
+#### 6.2 Covid-19: Premium for Bedrooms
+#### 6.3 Covid-19: Premium for City Centrality
+#### 6.4 Covid-19: Premium for Relative Price Levels 
+#### 6.5 Covid-19: Premium for Size
+#### 6.6 Covid-19: Premium for Age 
+#### 6.7 Covid-19: Change in Days on Market
+#### 6.8 Summary of Results
+
+
+
+
+
+
+
+<br><br>
+
+### 7. Discussion
 
 <br><br>
 
