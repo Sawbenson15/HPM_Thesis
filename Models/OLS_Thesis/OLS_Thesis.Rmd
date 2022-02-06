@@ -964,6 +964,28 @@ ggplot(data_factor, aes(x = infections_period, y = age, fill = infections_period
 
 ###### 2.4.2 Modeling
 ```{r, warning=FALSE, attr.output='style="max-height: 250px;"'}
+
+# Testing Corona, age, general
+lm_corona_age <- lm(sold_price ~ .
+               
+                        # test variable(s)                    
+                        + data_factor$infections_3mma + age + data_factor$infections_3mma*age 
+                       
+                        # Removals
+                        - age
+                        #- age_2
+                        - property_type
+                       
+                       ,data = data_factor_core_clean)
+coeftest(lm_corona_age, vcov = vcovHC(lm_corona_age, method = "White2", type = "HC0"))
+# Table output
+tab_model(lm_corona_age, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "age:data_factor$infections_3mma"))
+
+
 # Testing Corona, top 25% in age
 lm_corona_age_top_single <- lm(sold_price ~
                
@@ -990,6 +1012,13 @@ lm_corona_age_top <- lm(sold_price ~ .
                        
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_age_top, vcov = vcovHC(lm_corona_age_top, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_age_top, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "data_factor$infections_3mma:top25_age"))
 
 # Testing Corona, bottom 25% in age
 lm_corona_age_bottom_single <- lm(sold_price ~ 
@@ -1018,6 +1047,12 @@ lm_corona_age_bottom <- lm(sold_price ~ .
                        
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_age_bottom, vcov = vcovHC(lm_corona_age_bottom, method = "White2", type = "HC0"))
+
+tab_model(lm_corona_age_bottom, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "data_factor$infections_3mma:bottom25_age"))
 
 ```
 
@@ -1777,15 +1812,15 @@ tab_model(lm_ucla)
 library(cowplot)
 library(ggplot2)
 
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/age_dist_total.png", scale = 1)
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_top.png", scale = 1)
 
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_corona.png", scale = 1)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_bottom.png", scale = 1)
 
-p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_quantile.png", scale = 1)
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_dist_quantile.png", scale = 1)
 
 p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_price_corona.png", scale = 1)
 
-plot_grid(p1, p2, p3)
+plot_grid(p1, p2)
 plot_grid(p4)
 
 ``` 
