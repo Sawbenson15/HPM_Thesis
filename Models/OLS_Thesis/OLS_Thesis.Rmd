@@ -1073,7 +1073,7 @@ ggplot(data_factor, aes(x = infections_period, y = sold_price/area_living, fill 
     theme(
       legend.position="none",
       plot.title = element_text(size=11)) +
-    ggtitle("Comparison of Living Area") +
+    ggtitle("Comparison of Living Area per Sqft.") +
     xlab("Infection Period") +
     ylab("Price per Living Area") +
     scale_fill_manual(values=c(very_low, med)) +
@@ -1777,20 +1777,16 @@ tab_model(lm_ucla)
 library(cowplot)
 library(ggplot2)
 
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_bottom.png", scale = 0.8)
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/age_dist_total.png", scale = 1)
 
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_top.png", scale = 0.9)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_corona.png", scale = 1)
 
-p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_quantiles.png", scale = 1)
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_quantile.png", scale = 1)
 
-p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_price.png", scale = 1)
+p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_price_corona.png", scale = 1)
 
-plot_grid(p1, p2)
+plot_grid(p1, p2, p3)
 plot_grid(p4)
-
-?plot_grid
-
-?draw_image()
 
 ``` 
 
