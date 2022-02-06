@@ -332,6 +332,8 @@ vip::vip(xgb.fit.final)
 # create importance matrix
 importance_matrix <- xgb.importance(model = xgb.fit.final)
 
+
+
 # variable importance plot
 xgb.plot.importance(importance_matrix, top_n = 20, measure = "Gain")
 ```
@@ -699,7 +701,107 @@ stopCluster(cl)
 
 ##### 5.2.2 Price
 ##### 5.2.2 Number of Bedrooms
+type = c("auto", "regression", "classification")
 
+```{r}
+
+vip::vip(xgb.fit.final)
+
+
+
+
+
+# variable importance plot
+xgb.plot.importance(importance_matrix, top_n = 20, measure = "Gain")
+
+
+
+
+
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp1 <- xgb.fit.final %>%
+  partial(pred.var = "beds_total_lev_x_1", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+pdp2 <- xgb.fit.final %>%
+  partial(pred.var = "beds_total_lev_x_2", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+pdp3 <- xgb.fit.final %>%
+  partial(pred.var = "beds_total_lev_x_3", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+pdp4 <- xgb.fit.final %>%
+  partial(pred.var = "beds_total_lev_x_4", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+pdp5 <- xgb.fit.final %>%
+  partial(pred.var = "beds_total_lev_x_5", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+
+gridExtra::grid.arrange(pdp, pdp2, pdp3, pdp4, pdp5, nrow = 5)
+
+stopCluster(cl)
+
+xgb.fit.final$callbacks$feature_names
+
+
+```
+
+
+```{r}
+# create importance matrix
+# Read in data
+
+library(readxl)
+importance_matrix_beds <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Importence_beds.xlsx")
+
+ggplot(data = importance_matrix_beds, aes(x = feature, y = importance)) +
+    geom_bar(stat="identity") + 
+    coord_flip() +
+    labs(title = "Importance Ranking: Number of Bedrooms",
+         y = "Importance",
+         x = "")
+```
+
+##### 5.2.2 City
+```{r}
+# Use parallel computing to speed up processing time
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+pdp <- xgb.fit.final %>%
+  partial(pred.var = "city_limits_lev_x_1", n.trees = 1827, grid.resolution = 100, train = features_train) %>%
+  autoplot(rug = TRUE, train = features_train) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("PDP")
+
+ice <- xgb.fit.final %>%
+  partial(pred.var = "city_limts", n.trees = 1827, grid.resolution = 100, train = features_train, ice = TRUE) %>%
+  autoplot(rug = TRUE, train = features_train, alpha = .1, center = TRUE) +
+  scale_y_continuous(labels = scales::dollar) +
+  ggtitle("ICE")
+
+
+pdp
+gridExtra::grid.arrange(pdp, ice, nrow = 2)
+
+stopCluster(cl)
+```
 
 ### Playground
 LIME
