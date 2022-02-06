@@ -1088,17 +1088,60 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 <br>
 
 ##### 6.4.4 ML Modeling
+<br>
 
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_PDP.png){width=90%}
+</center>
+
+<br>
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_heats_com.png){width=90%}
+</center>
+
+<br>
 
 
 #### 6.5 Covid-19: Premium for Age 
 ##### 6.5.1 Summary of Findings
 ##### 6.5.2 Visual Review
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_dists_com.png){width=90%}
+</center>
+
+<br>
+
 ##### 6.5.3 OLS Modeling
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_gen.png){width=50%}
+</center>
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_ols_com.png){width=100%}
+</center>
+
+<br>
+
 ##### 6.5.4 ML Modeling
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_PDP.png){width=100%}
+</center>
 
+<br>
+<br>
 
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_PDP.png){width=100%}
+</center>
 
+<br>
 
 #### 6.6 Covid-19: Change in Days on Market
 ##### 6.6.1 Summary of Findings
