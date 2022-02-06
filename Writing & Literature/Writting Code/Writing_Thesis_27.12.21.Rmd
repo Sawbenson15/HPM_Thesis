@@ -4,8 +4,8 @@ title: An Emperical Economic Investigation into COVID-19's Impact on Fundemental
 author: "Sawyer M. Benson"
 date: "December 21, 2021"
 output:
-  word_document: default
   html_notebook: default
+  word_document: default
   html_document:
     df_print: paged
   pdf_document: default
@@ -475,7 +475,7 @@ A Breusch-Pagan test was conducted on a standard linear regression model with so
 
 <br>
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 df <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/BP_Test.xlsx"))
 #df <- df[1,1]
 
@@ -617,7 +617,7 @@ A good measurement variable for measuring the response of the market to the coro
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infect_combined.png){width=99%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Waves_of_infection.png){width=70%}
 </center>
 
 <br>
@@ -764,7 +764,7 @@ Since the XGBoost machine requires only numerical data, factor data must be conv
 
 <br>
 
-Once the model is fitted to the data, the next procedure is to tune the hyperparameters which govern the algorithm's learning process and therefore determine the resulting values of estimated parameters. To do this, a large grid of hyperparameters is created and then an individual model containing each unique combination of hyperparameter levels is generated and their resulting test MSE's are ranked and analyzed. The results from this large grid search determin which combination of hyperparameters are optimal, and those hyperparameters are used in the final model.
+Once the model is fitted to the data, the next procedure is to tune the hyperparameters which govern the algorithm's learning process and therefore determine the resulting values of estimated parameters. To do this, a large grid of hyperparameters is created and then an individual model containing each unique combination of hyperparameter levels is generated and their resulting test MSE's are ranked and analyzed. The results from this large grid search determine which combination of hyperparameters are optimal, and those hyperparameters are used in the final model. The search grid from this research was so large, it took my computer *78 hours* to complete all of the calculation necessary for the full tuning process.
 
 <br>
 
@@ -776,19 +776,11 @@ Image XX shows an example of each graph
 
 <br>
 
-```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/PDP_Example_Combined.png){width=99%}
+</center>
 
-library(cowplot)
-library(ggplot2)
-
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/PDP_Example.png", scale = 1)
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/ICE_Example.png", scale = 1)
-p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/heat_test.png", scale = 1)
-p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/3D_Example.png", scale = 1)
-
-plot_grid(p1, p2, p3, p4)
-
-``` 
+<br>
 
 <br><br>
 
@@ -816,7 +808,7 @@ plot_grid(p1, p2, p3, p4)
 <br>
 
 #### 5.4 Covid-19: Premium for Relative Price Levels 
-> **Hypothesis III:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
+> **Hypothesis IV:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
 >
 > **Reasoning:** Households who live in the top 25th percentile of home prices are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium willing to pay for additonal hedonic features.  
 
@@ -824,13 +816,13 @@ plot_grid(p1, p2, p3, p4)
 
 #### 5.5 Covid-19: Premium for Size
 
-> **Hypothesis III:** The Covid-19 crisis increased the premium for property size 
+> **Hypothesis V:** The Covid-19 crisis increased the premium for property size 
 >
 > **Reasoning:** Same as for hypothesis I
 
 <br>
 
-> **Hypothesis IV:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
+> **Hypothesis VI:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
 >
 > **Reasoning:** Households who live in the top 25th percentile of home sizes are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium they are willing to pay for additonal hedonic features.
 
@@ -838,13 +830,13 @@ plot_grid(p1, p2, p3, p4)
 
 #### 5.6 Covid-19: Premium for Age 
 
-> **Hypothesis V:** The Covid-19 crisis increased the premium for property age 
+> **Hypothesis VII:** The Covid-19 crisis increased the premium for property age 
 >
 > **Reasoning:** As the volocity of home sales increase, the general relationship between property age and price is expected to be exasterbated as those upgrading houses will shit towards newer properties
 
 <br>
 
-> **Hypothesis VI:** The Covid-19 crisis impacted properties in the top 25th percentile of age more than the bottom 25th percentile  
+> **Hypothesis VIII:** The Covid-19 crisis impacted properties in the top 25th percentile of age more than the bottom 25th percentile  
 >
 > **Reasoning:** The premium for the youngest (i.e. newest) properties is expected to increase while the premium for the oldest properties is expected to decrease. As the market shifts towards newer properties, they must necissarily shift away from older properties.
 
@@ -852,13 +844,13 @@ plot_grid(p1, p2, p3, p4)
 
 #### 5.7 Covid-19: Change in Days on Market
 
-> **Hypothesis V:** The Covid-19 crisis significantly impacted the premium for days on market 
+> **Hypothesis IX:** The Covid-19 crisis significantly impacted the premium for days on market 
 >
 > **Reasoning:** As the volocity of home sales increase, more homes are sold faster, and therefore the number of days on the market becomes less of a predictor of quality since even lower quality and over-priced homes are sold more quickly. 
 
 <br>
 
-> **Hypothesis III:** The Covid-19 crisis impacted properties in the top 25th percentile of days on market more than the bottom 25th percentile 
+> **Hypothesis X:** The Covid-19 crisis impacted properties in the top 25th percentile of days on market more than the bottom 25th percentile 
 >
 > **Reasoning:** The premium for a property being sold within the top 25th percentile of days on market (DOM), i.e. the properties which sit on the market the logest, is expected to be disproportionately effected when compared homes which sold the fastest, as households elasticity of demand for specific characteristics decreses relative to price, it will take larger deviation in price and quality to make a home sell in the top 25th percentile of DOM 
 
@@ -867,44 +859,255 @@ plot_grid(p1, p2, p3, p4)
 <br><br>
 
 ### 6. Results
-There will be a clear and consistant structure for each subsection of results. Each hypothesis will have: 
-
-* A *general overview* of the characteristic being modeled
-  + This is to give the reader a clear understanding of the feature being modeled in terms of frequency, central tendency, and key relationships to time, infection rates, and other features wich may be relevant
-* Model results with standard hypothesis conclusion(s) 
+This section will follow a clear and consistent structure for each subsection of results. Each hypothesis will have: A *general overview* of the characteristic being modeled and; *model results* with standard hypothesis conclusion(s). 
 
 <br>
 
 #### 6.1 Covid-19: General Case
-#### 6.1.1 Visual Review
+##### 6.1.1 Summary of Findings
+> Preliminary analysis of housing prices and daily infections reveals a positive historical relationship between these two key variables. This relationship is strongly supported by the XGBoost ML algorithm, which shows that a maximal reduction in predictions error is acheived by increasing the prediciton price at all levels of daily infections > 0, holding all other factors constant. XGBoost determines that from the 104 total variables, daily infections is the 19th most important variable in reducing price prediction error.  
+>
+> Furthermore, in the fully controlled Alpha model, the beta coefficient for daily infections suggests that each additional infection is associated with an average home price *increase of $8.97*, ceteris parabus. This finding is significant at the *p < 0.00* level.  
 
-As in 
-```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+##### 6.1.2 Visual Review
+We first look at the distribution of daily infections and the accumulation of infections across time. The variation in historical daily infections should provide a strong measurement for explaining variations in price related to this key variable. 
 
-library(cowplot)
-library(ggplot2)
+<br>
 
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Waves_of_infection.png", scale = 1)
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Accumulation_of_infections.png", scale = 1)
-p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infections_and_Price.png", scale = 1)
-p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infection_period_price_dist_.png", scale = 1)
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infections_combined.png){width=99%}
+</center>
 
-plot_grid(p1, p2, p3, p4)
+<br>
 
-``` 
+Looking at the raw historical relationship between infections rates and prices, we look at the trend line of price vs daily infections (rhs) and a comparison between the price distributions of pre and post-infections period (lhs), we see historically positive relationship between infections and price. Though these graphs are promising, it is unclear if other factors could be influencing this relationship. To establish  
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Infect_price_combo.png){width=99%}
+</center>
+
+<br>
+
+##### 6.1.3 OLS Modeling
+Since displaying the full OLS output for ever section is impractical, I will include a summarized version with the only the key variables included. Please note that if you wish to see each regression output table, code, and data associated with this thesis, you can visit my GitHub repository with the following link: https://github.com/Sawbenson15/HPM_Thesis.
+
+> In the fully controlled Alpha model, the beta coefficient for daily infections shows that each additional infection is associated with an average home price *increase of $8.97*, ceteris parabus. This finding is significant at the *p < 0.00* level   
+
+This foundational finding lays the groundwork for the following results, which attempt to explain the significant relationship between infections and price at the level of individual hedonic variables.  
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/summary_OLS.png){width=40%}
+</center>
+
+<br><br>
+
+The following graphic shows the historical trend line for infection vs sold price with 1SD error margins (grey), the best single-variable fit (green), and the marginal fit of the Alpha model (blue). We see that the controls of the Alpha model have flatten the marginal effect of each additional infection on price, however, this relationshiip remains positive and significant, as previously established.  
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Corona_price_OLSFit.png){width=55%}
+</center>
+
+<br>
+
+##### 6.1.4 ML Modeling
+To further test the relevance of corona infections in determining prices, we look at this variable's relative ranking based it's ability to improve out-of-sample predictions within our XGboost model. This measurment is called Variable Importance. 
+
+We see that of the 104 unique variables offered to the XGBoost machine, the 3-month moving average of infection was the 19th most descriptive variable in predicting prices. This is an very strong confirmation that the relationship found in the OLS model is correct. 
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Var_Importance.png){width=90%}
+</center>
+
+To get a detailed understanding of the marginal effect each additional infection has on price through, we look at the PDP and the ICE of infections and price. The PDP (top) shows the optimal price change w.r.t. daily infections which minimize the model's test MSE. The ICE (bottom) is the individual PDP for every observation in the dataset, centered at infection = 0. This allows us to understand the simple PDP in more detail and also to pick up on any signs of heteroskedasticity amoung individual sample predictions. 
+
+The PDP shows that on average, an increase in price at every level of daily infections > 0 reduces test MSE. Furthermore, this trend is generally upward facing, with a notable range of response between 1,800 and 2,500 infections, which I refered to as the *infections-price ridge.* Discussions regarding possible explanations for the general shape of this region will be explored in section 7.     
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/PDP_ICE_general.png){width=80%}
+</center>
 
 <br>
 
 #### 6.2 Covid-19: Premium for Bedrooms
+##### 6.2.1 Summary of Findings
+
+> There are two contextual details which must be considered for one to appropriatly interpret the following findings. First, number of bedrooms and the total living area of a home are highly correlated, and therefore when total living area is included, the beta coefficients for each level of bedroom represents only the premium homeowners are willing to pay for the actual feature of an extra bedroom, and not the extra living area itself. This will make premiums seem low. Secondly, the OLS results listed below represent the change in the beta coefficients from post and pre corona, not the absolute effect, as in the case of measuring daily infection alone.     
+>
+> Prelimilary finding show that the price distribution for every level of number of bedrooms increased after the beginning of the infection period (i.e. accumulation of infections >= 1000)
+>
+> The fully controled Alpha model results show that the premium for each level of number of bedrooms modestly increased in response to daily infection. Every corona-driven increase is significant at the p < 0.05 level except for single bedroom homes. Possible theories for why this shift happened is explored in section 7.
+
+
+##### 6.2.2 Visual Review
+General distribution of bedrooms per house
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/bed_dist_gen.png){width=80%}
+</center>
+
+<br>
+
+Distributions of price at each number of bedrooms (lhs) and the same plot but split or before and after infections period (rhs)
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/bed_combined.png){width=100%}
+</center>
+
+<br>
+
+However, it is important to remember that size (i.e. total living area) is controlled for in the Alpha model. Therefore, it is more accurate to look at the same two plots above, but normalized per square foot. We see a significant flattening between each number of bedrooms level, however, a distinct change from pre vs post infection period is still visible (rhs). The next section will test if this shift from post to pre-corona is significantly in general, and significantly related to daily infections.
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/bed_ppsf_combined.png){width=100%}
+</center>
+
+<br>
+
+##### 6.2.3 OLS Modeling
+Interpretation under construction
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/OLS_Output.png){width=50%}
+</center>
+
+<br>
+
+##### 6.2.4 ML Modeling
+Due to number of bedrooms being categorical, the results of the XGBoost model for these variables are not as easily visually represented as continuous variables, which have celar PDPs. However, we can consider the results in written form and with importance ranking. 
+
+The variable importance ranking of each factor level from 1-through-5 bedrooms is 84, 60, 47, 34, and 68 respectively. This relatively low relevance is expected, as much of the explanatory power of bedrooms on price is taken by total living area, ranked number 1 in importance.
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/beds_importance.png){width=60%}
+</center>
+
+<br>
+
 #### 6.3 Covid-19: Premium for City Centrality
-#### 6.4 Covid-19: Premium for Relative Price Levels 
-#### 6.5 Covid-19: Premium for Size
-#### 6.6 Covid-19: Premium for Age 
-#### 6.7 Covid-19: Change in Days on Market
-#### 6.8 Summary of Results
+##### 6.3.1 Summary of Findings
 
 
 
+##### 6.3.2 Visual Review
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/total_dist.png){width=100%}
+</center>
+
+<br>
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/city_dist.png){width=100%}
+</center>
+
+<br>
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/city_limits_and_corona.png){width=80%}
+</center>
+
+<br>
+
+##### 6.3.3 OLS Modeling
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/OLS.png){width=50%}
+</center>
+
+<br>
+
+
+##### 6.3.4 ML Modeling
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/City_PDP.png){width=50%}
+</center>
+
+<br>
+
+#### 6.4 Covid-19: Premium for Size
+##### 6.4.1 Summary of Findings
+
+
+
+##### 6.4.2 Visual Review
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_total_com.png){width=100%}
+</center>
+
+<br>
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_price_coronaa.png){width=70%}
+</center>
+
+<br>
+
+##### 6.4.3 OLS Modeling
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_total.png){width=50%}
+</center>
+
+<br>
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/Screen Shot 2022-02-06 at 18.36.46.png){width=100%}
+</center>
+
+<br>
+
+##### 6.4.4 ML Modeling
+
+
+
+#### 6.5 Covid-19: Premium for Age 
+##### 6.5.1 Summary of Findings
+##### 6.5.2 Visual Review
+##### 6.5.3 OLS Modeling
+##### 6.5.4 ML Modeling
+
+
+
+
+#### 6.6 Covid-19: Change in Days on Market
+##### 6.6.1 Summary of Findings
+##### 6.6.2 Visual Review
+##### 6.6.3 OLS Modeling
+##### 6.6.4 ML Modeling
+
+
+#### 6.7 Summary of Results and Hypothesis 
 
 
 
@@ -915,11 +1118,11 @@ plot_grid(p1, p2, p3, p4)
 
 <br><br>
 
-### 7. Conclusion
+### 8. Conclusion
 
 <br><br>
 
-### 8. Bibliography
+### 9. Bibliography
 
 <br><br>
 
@@ -957,68 +1160,6 @@ plot_grid(p1, p2, p3, p4)
 #### Playground
 
 ```{r}
-library(gt)
-library(tidyverse)
-library(glue)
-
-# Define the start and end dates for the data range
-start_date <- "2010-06-07"
-end_date <- "2010-06-14"
-
-# Create a gt table based on preprocessed
-# `sp500` table data
-sp500 %>%
-  dplyr::filter(date >= start_date & date <= end_date) %>%
-  dplyr::select(-adj_close) %>%
-  gt() %>%
-  tab_header(
-    title = "S&P 500",
-    subtitle = glue::glue("{start_date} to {end_date}")
-  ) %>%
-  fmt_date(
-    columns = vars(date),
-    date_style = 3
-  ) %>%
-  fmt_currency(
-    columns = vars(open, high, low, close),
-    currency = "USD"
-  ) %>%
-  fmt_number(
-    columns = vars(volume),
-    suffixing = TRUE
-  )
-
-
-# Tables
-table1 <- gt(df3)
-table1 <- table1 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-
-table2 <- gt(df3)
-table2 <- table1 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-
-# Combine 1 and 2
-data_tables <- data.frame(table_1 = table1, table_2 = table2)
-data_tables
-
-data_tables %>% 
-  gt() %>% 
-  fmt_markdown(columns = TRUE) %>% #render cell contents as html
-  cols_label(table_1.Count = "Table 1", 
-             table_2.Count = "Table 2")
-
-
-hp_table <- function(x){
-  gt(x) %>% 
-    data_color(columns = c("hp"), 
-               colors = col_numeric(palette = "Blues", 
-                                    domain = c(0, 400))) %>% 
-    tab_options(column_labels.hidden = TRUE) %>% 
-    as_raw_html() # return as html
-}
-
-
 
 ```
 
