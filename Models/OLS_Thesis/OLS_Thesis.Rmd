@@ -532,11 +532,19 @@ lm_corona <- lm(sold_price ~ infections_3mma + .
 summ(lm_corona)
 coeftest(lm_corona, vcov = vcovHC(lm_corona, method = "White2", type = "HC0"))
 
+# Table output
+tab_model(lm_corona, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)", "infections_3mma"))
+
+
 # Visualizing marginal effect per positive tests on price
 lm_corona_single <- lm(sold_price ~ infections_3mma 
                 
                 ,data = data_factor_core_clean)
-summ(lm_corona_single)    
+summ(lm_corona_single)
+
 
 ggpredict_1 <- ggpredict(lm_corona, terms = "infections_3mma")
 ggpredict_2 <- ggpredict(lm_corona_single, terms = "infections_3mma")
@@ -544,9 +552,9 @@ ggpredict_2 <- ggpredict(lm_corona_single, terms = "infections_3mma")
 # Plots
 ggplot(data_factor_core, aes(x = infections_3mma)) +
    geom_smooth(data_factor_core, mapping = aes(y = sold_price), color = "grey50") + # Actual Data
-   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = "darkred") + # Controlled model
-   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = "darkblue") + # Best single fit
-   ggtitle("Model Fit Overview") 
+   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = low) + # Controlled model
+   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = med) + # Best single fit
+   ggtitle("Model Fit Overview")
  
 # Predicting infections with house prices
 lm_flip <- lm_flip <- lm(infections_3mma ~ sold_price , data = data_factor)
@@ -723,6 +731,17 @@ lm_corona_bedrooms <- lm(sold_price ~ . +
 summ(lm_corona_bedrooms)
 coeftest(lm_corona_bedrooms, vcov = vcovHC(lm_corona_bedrooms, method = "White2", type = "HC0"))
 
+# Table output
+tab_model(lm_corona_bedrooms, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)", 
+                    "beds_total1:data_factor$infections_3mma",
+                    "beds_total2:data_factor$infections_3mma",
+                    "beds_total3:data_factor$infections_3mma",
+                    "beds_total4:data_factor$infections_3mma",
+                    "beds_total5:data_factor$infections_3mma"))
+
 ```
 
 <br>
@@ -844,7 +863,7 @@ lm_corona_price_bottom_single <- lm(sold_price ~ +
                        # Removals
                        
                        ,data = data_factor_core_clean)
-summ(lm_corona_price_bottom)
+summ(lm_corona_price_bottom_single)
 coeftest(lm_corona_price_bottom_single, vcov = vcovHC(lm_corona_price_bottom_single, method = "White2", type = "HC0"))
 
 # General Model: No controls
@@ -1045,7 +1064,7 @@ ggplot(data_factor) +
                       labels = c("Pre", "Post"))
 
 #area_living on Infections
-ggplot(data_factor, aes(x = infections_period, y = area_living, fill = infections_period)) +
+ggplot(data_factor, aes(x = infections_period, y = sold_price/area_living, fill = infections_period)) +
     geom_violin(alpha = 0.5) +
     geom_boxplot(width=0.1) +
     scale_fill_viridis(discrete = TRUE, alpha=0.6, option="D") +
@@ -1056,8 +1075,9 @@ ggplot(data_factor, aes(x = infections_period, y = area_living, fill = infection
       plot.title = element_text(size=11)) +
     ggtitle("Comparison of Living Area") +
     xlab("Infection Period") +
-    ylab("Living Area") +
-    scale_fill_manual(values=c(very_low, med))
+    ylab("Price per Living Area") +
+    scale_fill_manual(values=c(very_low, med)) +
+    scale_y_continuous(limits = c(0,250))
 
 
 
@@ -1066,6 +1086,29 @@ ggplot(data_factor, aes(x = infections_period, y = area_living, fill = infection
 
 ###### 2.5.2 Modeling
 ```{r, warning=FALSE, attr.output='style="max-height: 250px;"'}
+# Testing Corona, area_living, general
+lm_corona_area_living <- lm(sold_price ~ .
+               
+                        # test variable(s)                    
+                        + data_factor$infections_3mma + area_living + data_factor$infections_3mma*area_living 
+                       
+                        # Removals
+                        - area_living
+                        - area_living_2
+                        - property_type
+                       
+                       ,data = data_factor_core_clean)
+coeftest(lm_corona_area_living, vcov = vcovHC(lm_corona_area_living, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_area_living, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)", 
+                    "area_living:data_factor$infections_3mma"))
+
+
+
 # Testing Corona, top 25% in area_living
 lm_corona_area_living_top_single <- lm(sold_price ~ .
                
@@ -1094,6 +1137,13 @@ lm_corona_area_living_top <- lm(sold_price ~ .
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_area_living_top, vcov = vcovHC(lm_corona_area_living_top, method = "White2", type = "HC0"))
 
+# Table output
+tab_model(lm_corona_area_living_top, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)", 
+                    "data_factor$infections_3mma:top25_area_living"))
+
 # Testing Corona, bottom 25% in area_living
 lm_corona_area_living_bottom_single <- lm(sold_price ~ .
                
@@ -1120,6 +1170,14 @@ lm_corona_area_living_bottom <- lm(sold_price ~ .
                        
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_area_living_bottom, vcov = vcovHC(lm_corona_area_living_bottom, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_area_living_bottom, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)", 
+                    "data_factor$infections_3mma:bottom25_area_living"))
+
 ```
 
 <br>
@@ -1245,11 +1303,44 @@ coeftest(lm_corona_dom_bottom, vcov = vcovHC(lm_corona_dom_bottom, method = "Whi
 
 ###### 2.7.1 Visualization
 ```{r, alpha = false}
-# Conditional Mean
+
+# Distribution: Total 
+ggplot(data = data_factor, aes(x = sold_price)) +
+    geom_density(mapping = aes(fill = low, alpha = 0.5, position = "identity")) +
+    ggtitle("Price Distributions of All Properties") +
+    theme(legend.position = "none") +
+    xlab("Sold Price") +
+    ylab("Density") +
+    scale_fill_manual(values = c(very_low))
+
+# Distribution: City vs non-city
+
+# Conditional Mean: City vs Rural
 library(plyr)
-city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits ==1), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+city_limits_mean_data <- ddply(data_factor, "city_limits", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+
+ggplot(data = data_factor, aes(x = sold_price, fill = city_limits)) +
+    geom_density(alpha = 0.5, position = "identity") +
+    ggtitle("Price Distributions of City vs Rural") +
+    geom_vline(data = city_limits_mean_data, aes(xintercept = city_limits_mean_data[2,2]), linetype="dashed", size= 0.5, color = med, alpha = 0.8) +
+    geom_vline(data = city_limits_mean_data, aes(xintercept = city_limits_mean_data[1,2]), linetype="dashed", size= 0.5, alpha = 0.8, color = very_low) +
+    scale_fill_manual(values = c(very_low, med), 
+                      name = "Infection Period",
+                      labels = c("Rural", "City")) +
+    xlab("Sold Price") +
+    ylab("Density") 
+
+
+# Conditional Mean: City pre vs post corona
+library(plyr)
+city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits ==1 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
 
 # Distribution: Just City
+
+# Conditional Mean: City pre vs post corona
+library(plyr)
+city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits ==1 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+
 ggplot(data = subset(data_factor, data_factor$city_limits ==1), aes(x = sold_price)) +
     geom_density(alpha = 0.5, position = "identity", fill = very_low) +
     ggtitle("Price Distribution of Properties in City Limits") +
@@ -1301,6 +1392,17 @@ lm_corona_city <- lm(sold_price ~ .
                        
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_city, vcov = vcovHC(lm_corona_city, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_city, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "data_factor$infections_3mma",
+                    "data_factor$city_limits1",
+                    "data_factor$infections_3mma:data_factor$city_limits1"))
+
+
 ```
 
 <br><br>
@@ -1669,7 +1771,27 @@ tab_model(lm_ucla)
 
 ```
 
+##### 3.5 Imagine Combinations
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
+library(cowplot)
+library(ggplot2)
 
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_bottom.png", scale = 0.8)
+
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_top.png", scale = 0.9)
+
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_quantiles.png", scale = 1)
+
+p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_price.png", scale = 1)
+
+plot_grid(p1, p2)
+plot_grid(p4)
+
+?plot_grid
+
+?draw_image()
+
+``` 
 
 end of document
