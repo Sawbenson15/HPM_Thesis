@@ -234,11 +234,20 @@ stargazer(lm_pre_alpha,
 ##### 1.3.1 Age
 ```{r, warning=FALSE, attr.output='style="max-height: 250px;"'}
 # Age
-a <- ggplot(data_factor, aes(x = age , y = sold_price)) + 
-    geom_point(aes(color = infections_period), alpha = 0.15) + 
-    geom_smooth(aes(color = infections_period)) +
-    geom_smooth(color = "grey50", linetype = "dashed") +
-    theme_minimal()
+a <- ggplot(data_factor, aes(x = age , y = sold_price)) +
+     geom_smooth(aes(fill = infections_period)) +
+     geom_smooth(linetype = "dashed", color = "grey32") +
+     theme_minimal() +
+     #scale_fill_manual(values=c(very_low, med)) +
+     labs(title = "Age and Price",
+          x = "Age",
+          y = "Price") +
+     scale_fill_manual(values = c(very_low, med), 
+                      name = "Infection Period",
+                      labels = c("Pre", "Post"))
+     
+
+a
 
 # Actual vs. fit
 
@@ -253,13 +262,19 @@ ggpredict_2 <- ggpredict(lm_pre_alpha_age, terms = "age")
 # Plots
 b <- ggplot(data_factor_core, aes( x = age)) +
    geom_smooth(data_factor_core, mapping = aes(y = sold_price), color = "grey50") +
-   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = "darkred") +
-   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = "darkblue")
+   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = very_low) +
+   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = med) +
+     labs(title = "Age and Price",
+          x = "Age",
+          y = "Prediction")
 
 # Look at age & age^2 alone to see impact on more relevant y-axis scale
 c <- ggplot() +
-   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = "darkred") +
-   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = "darkblue") 
+   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = very_low) +
+   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = med) +
+     labs(title = "Age and Price",
+          x = "Age",
+          y = "Prediction") 
 
 a
 gridExtra::grid.arrange(b,c, nrow =2, ncol = 1)
@@ -273,11 +288,19 @@ gridExtra::grid.arrange(b,c, nrow =2, ncol = 1)
 # Living Area
 
 # General graphing
-a <- ggplot(data_factor, aes(x = area_living , y = sold_price)) + 
-    geom_point(aes(color = infections_period), alpha = 0.15) + 
-    geom_smooth(aes(color = infections_period)) +
-    geom_smooth(color = "grey50", linetype = "dashed") +
-    theme_minimal()
+a <- ggplot(data_factor, aes(x = area_living , y = sold_price)) +
+     geom_smooth(aes(fill = infections_period)) +
+     geom_smooth(linetype = "dashed", color = "grey32") +
+     theme_minimal() +
+     #scale_fill_manual(values=c(very_low, med)) +
+     labs(title = "Living Area and Price",
+          x = "Living Area",
+          y = "Price") +
+     scale_fill_manual(values = c(very_low, med), 
+                      name = "Infection Period",
+                      labels = c("Pre", "Post"))
+
+a
 
 ggplot(data_factor, aes(x = area_living , y = sold_price/area_living)) + 
     geom_point(aes(color = infections_period), alpha = 0.15) + 
@@ -302,14 +325,19 @@ ggpredict_3 <- ggpredict(lm_pre_alpha_area_single, terms = "area_living") # sing
 # Plots
 b <- ggplot(data_factor_core, aes(x = area_living)) +
    geom_smooth(data_factor, mapping = aes(y = sold_price), color = "grey50") +
-   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = "darkred") +
-   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = "darkblue") +
-   geom_smooth(ggpredict_3, mapping = aes(x, predicted), linetype = "dashed", color = "darkblue")
+   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = very_low) +
+   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = med) +
+     labs(title = "Living Area and Price",
+          x = "Living Area",
+          y = "Prediction")
 
 # Look at age & age^2 alone to see impact on more relevant y-axis scale
 c <- ggplot() +
-   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = "darkred") +
-   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = "darkblue") 
+   geom_smooth(ggpredict_1, mapping = aes(x, predicted), linetype = "dashed", color = very_low) +
+   geom_smooth(ggpredict_2, mapping = aes(x, predicted), linetype = "dashed", color = med) +
+     labs(title = "Living Area and Price",
+          x = "Living Area",
+          y = "Prediction")
 
 # Conclusion
 a
@@ -1277,6 +1305,28 @@ ggplot(data_factor, aes(x = infections_period, y = dom, fill = infections_period
 ```
 ###### 2.6.2 Modeling
 ```{r, warning=FALSE, attr.output='style="max-height: 250px;"'}
+
+# Testing Corona, dom, general
+lm_corona_dom <- lm(sold_price ~ .
+               
+                        # test variable(s)                    
+                        + data_factor$infections_3mma + dom + data_factor$infections_3mma*dom 
+                       
+                        # Removals
+                        - dom
+                        - property_type
+                       
+                       ,data = data_factor_core_clean)
+coeftest(lm_corona_dom, vcov = vcovHC(lm_corona_dom, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_dom, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "dom:data_factor$infections_3mma"))
+
+
 # Testing Corona, top 25% in dom
 lm_corona_dom_top_single <- lm(sold_price ~ .
                
@@ -1302,6 +1352,13 @@ lm_corona_dom_top <- lm(sold_price ~ .
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_dom_top, vcov = vcovHC(lm_corona_dom_top, method = "White2", type = "HC0"))
 
+# Table output
+tab_model(lm_corona_dom_top, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "data_factor$infections_3mma:top25_dom"))
+
 # Testing Corona, bottom 25% in dom
 lm_corona_dom_bottom_single <- lm(sold_price ~ .
                
@@ -1326,6 +1383,14 @@ lm_corona_dom_bottom <- lm(sold_price ~ .
                        
                        ,data = data_factor_core_clean)
 coeftest(lm_corona_dom_bottom, vcov = vcovHC(lm_corona_dom_bottom, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_dom_bottom, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "bottom25_dom1:data_factor$infections_3mma"))
+
 
 # top 25% is too tight!! means aren't different
 
@@ -1812,16 +1877,18 @@ tab_model(lm_ucla)
 library(cowplot)
 library(ggplot2)
 
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_top.png", scale = 1)
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age_non_lin.png", scale = 0.90)
 
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_bottom.png", scale = 1)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age_non_lin_ols.png", scale = 0.90)
 
-p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_dist_quantile.png", scale = 1)
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/area_price_nonlin.png", scale = 0.90)
 
-p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_dist_price_corona.png", scale = 1)
+p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_non_lin_ols.png", scale = 0.90)
 
 plot_grid(p1, p2)
-plot_grid(p4)
+plot_grid(p3, p4)
+
+?plot_grid()
 
 ``` 
 
