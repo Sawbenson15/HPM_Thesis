@@ -13,6 +13,13 @@ bibliography: library.bib
 link-citations: yes
 ---
 
+
+<br><br>
+
+### Check List
+* Check section numbering
+* Spell check
+
 <br><br>
 
 ### Cover Page
@@ -436,7 +443,7 @@ As the standard descriptive characteristics of a particular variable are conside
 Under Construction
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Corona General/Sample_Index.png){width=90%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Index.png){width=90%}
 </center>
 
 
@@ -526,46 +533,57 @@ This test resulted in the elimination of the variables ***list_price*** and ***a
 ##### 4.1.4 Accounting for Non-linearities
 I visual analysis was conducted on all continuous variables and non-linear variables transformation were added to ***age*** and ***area_living***
 
-###### 4.1.4.1 Age
+*Age:*
+
 An analysis of age vs. sold price shows a well-established u-shaped pattern. In order to allow the OLS model to better capture this relationship, a new variable $age^2$ is added to the model. 
 
 Image x shows the Partial Dependency Plot (PDP) of age within the Alpha model. This plots the marginal prediction of the Alpha model across the full range of age. When the scale of the y-axis is reduced, we see the slight curvature in Alpha model's estimation of age effects. This addition improved $R^2$ by $.08$. 
 
+<br>
+
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age.png){width=70%}
-</center>
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age.fitted.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age_non_lin_com.png){width=100%}
 </center>
 
-###### 4.1.4.2 Living Area
+<br>
+
+*Living Area:*
+
 An analysis of living-area vs. sold price reveals a Sigmoid pattern between the two variables. In order to allow the OLS model to better capture this relationship, a new variable $living \ area^2$ is added to the model. 
 
 Image x shows the Partial Dependency Plot (PDP) of $living \ area^2$ within the Alpha model. This addition improved $R^2$ by $.06$.
 
+<br>
+
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_non_lin_com.png){width=100%}
 </center>
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_combined.png){width=70%}
-</center>
+
+<br>
 
 ##### 4.1.5 Accounting for High-Leverage Points and Outliers
 After the adjustments or the previous sections have been made, a panel of visualizations are run on the Alpha model. The results show no extreme outliers and only one high-leverage point (obs #23515), as shows by the residual vs. leverage plot in quadrant two of image X, which is removed in the final Alpha model. These results are mainly due to the previous removal of outliers in §3.2 and the overall quality of the data set. 
 
+<br>
+
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/alpha_plots.png){width=70%}
 </center>
+
+<br>
 
 ##### 4.1.6 Final Alpha Model
 Under Construction
 
 The Alpha model is the baseline OLS for this thesis and is rebust to heteroskadasticity, multicolinearity, non-linearities, high-leverage points and outliers. These high-level adjustment increase our confidence in the statistical tests results which follow  
 
+<br>
+
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Alpha_model_final.png){width=70%}
 </center>
 
+<br>
 
 #### 4.3 Modeling Changes in Demand for Hedonic Features
 The focus of this thesis is how the Covid crisis impacted housing prices and the relative levels of demand for specific hedonic features. In the case where the HPM is in the OLS functional form, the beta coefficients of this model represent relative demand for each associated hedonic feature [@Shimizu]. For example, $\beta_{pool = 1} =11,856$ is interpreted as the average consumer's willingness to pay for an average pool, ceteris parabus. However, this thesis wishes to measure the *changes* in the average consumer's willingness to pay for a given feature (e.g. pool) in relationship a measurement of Covid's economic impact. 
@@ -1009,11 +1027,14 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 ##### 6.3.2 Visual Review
 <br>
 
+Below we see a leftward shift of the price distribution for properties that are located within city limits (rhs).  
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/total_dist.png){width=100%}
 </center>
 
 <br>
+
+To better understand the effect corona had on properties specifically located within city limits, we further split the city_limits distribution by infection periods. This separation shows a clear  
 <br>
 
 <center>
@@ -1054,6 +1075,8 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 
 
 ##### 6.4.2 Visual Review
+Total living area 
+
 <br>
 
 <center>
@@ -1099,7 +1122,7 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_heats_com.png){width=90%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Living_area/area_heat_com.png){width=100%}
 </center>
 
 <br>
@@ -1138,7 +1161,7 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_PDP.png){width=100%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_heat_com.png){width=100%}
 </center>
 
 <br>
@@ -1146,8 +1169,49 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 #### 6.6 Covid-19: Change in Days on Market
 ##### 6.6.1 Summary of Findings
 ##### 6.6.2 Visual Review
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Dom/dom_dist_com.png){width=100%}
+</center>
+
+<br>
+
+
 ##### 6.6.3 OLS Modeling
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Dom/dom_gen.png){width=50%}
+</center>
+
+<br>
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Dom/dom_com.png){width=100%}
+</center>
+
+<br>
+
+
+
 ##### 6.6.4 ML Modeling
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Dom/dom_PDP.png){width=70%}
+</center>
+
+<br>
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Dom/dom_heat_com.png){width=100%}
+</center>
+
+<br>
 
 
 #### 6.7 Summary of Results and Hypothesis 
