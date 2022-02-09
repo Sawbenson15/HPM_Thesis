@@ -1515,24 +1515,39 @@ tab_model(lm_corona_city,
 
 ```{r}
 
-data_index <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/Index_hardkey.xlsx")
+data_index <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/Index_hardkey.xlsx")
 attach(data_index)
 
-data_index_fred <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/Index_FRED.xls")
+data_index_fred <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/Index_FRED.xls")
 attach(data_index_fred)
 
-data_index_gdp <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/la_GDP.xls")
+data_index_gdp <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/la_GDP.xls")
 attach(data_index_gdp)
 
-data_index_fred_1975_total <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/Thesis_Github/Models/Data/New Data/Total_US_1975.xls")
+data_index_fred_1975_total <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/Total_US_1975.xls")
 attach(data_index_fred_1975_total)
+
+# GDP and Housing Prices
+ggplot(data_index_fred_1975_total, aes(x = date)) + 
+    geom_line(aes(y = gdp_pc_nom_index_1975), color = "darkred") +
+    geom_line(aes(y = re), color = "darkred") +
+    theme_minimal() +
+    geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
+    #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
+    scale_y_continuous(limits = c(min(index_Q1_1980),max(index_Q1_1980))) +
+    xlab(" ") +
+    ylab("Index Value") +
+    labs(title = "Louisiana Housing Index: FRED St. Louis",
+         caption = "") 
+
+
 
 # Index graphing
 ggplot(data_index, aes(x = Date)) +
-    geom_line(mapping = aes(y = lma_2m_index), color = "darkred") +
-    geom_line(mapping = aes(y = lma_3m_index), color = "darkgreen") +
-    geom_line(mapping = aes(y = lma_4m_index), color = "darkblue") +
-    geom_line(mapping = aes(y = lma_5m_index), color = "grey45") +
+    geom_line(mapping = aes(y = lma_2m_index), color = high) +
+    geom_line(mapping = aes(y = lma_3m_index), color = med) +
+    geom_line(mapping = aes(y = lma_4m_index), color = low) +
+    geom_line(mapping = aes(y = lma_5m_index), color = very_low) +
     geom_vline(xintercept = as.numeric(as.Date("2020-03-23")), linetype=4, color = "green") +
     #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
     scale_y_continuous(limits = c(min(lma_2m_index),max(lma_2m_index))) +
@@ -1877,9 +1892,9 @@ tab_model(lm_ucla)
 library(cowplot)
 library(ggplot2)
 
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age_non_lin.png", scale = 0.90)
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/var_list_1.png", scale = 1)
 
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/age_non_lin_ols.png", scale = 0.90)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Var_list_2.png", scale = 1)
 
 p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/area_price_nonlin.png", scale = 0.90)
 
@@ -1891,5 +1906,108 @@ plot_grid(p3, p4)
 ?plot_grid()
 
 ``` 
+
+
+##### 3.6 Tables
+```{r echo=FALSE, results='asis'}
+
+library(readxl) # Import excel data frames
+df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+df1 <- df1[,1:2]
+colnames(df1) <- c("Name", "Information")
+
+
+table1 <- gt(df1)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table1
+```
+
+```{r echo=FALSE, results='asis'}
+# Table 2
+df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
+df2 <- df2[,1:3]
+colnames(df2) <- c("Variable Type", "Variables", "Observations")
+
+table2 <- gt(df2)
+table2 <- table2 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table2
+
+# Joining Code
+# Under construction
+
+```
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
+</center>
+
+<br>
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Set Summary
+df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+
+table1 <- gt(df1)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table1
+```
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Structure Overview
+df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
+df2 <- df2 %>% select(1, 4:5)
+
+colnames(df2) <- c("Variable Type", "Variables", "Observations")
+
+table2 <- gt(df2)
+table2 <- table2 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+table2
+
+```
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Set Summary
+df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Variable_table.xlsx"))
+
+df3 <- df3[25:49, ]
+
+table1 <- gt(df3)
+table1 <- table1 %>% tab_header(title = md("Variable List"),
+                                subtitle = md("*Structure and short discription*"))
+
+table1
+```
+
+```{r echo=FALSE, warning=FALSE}
+df <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/BP_Test.xlsx"))
+#df <- df[1,1]
+
+table1 <- gt(df)
+table1 <- table1 %>% tab_header(title = md("Breusch Paga Test for Heteroskedasticity"),
+                                subtitle = md("*Hypotheses*")) %>%
+                                tab_style(style = "padding-top:12px;padding-bottom:12px;",
+                                locations = cells_column_labels()) %>%
+                                tab_spanner(label = "Hypotheses",
+                                            columns = c(Hypotheses)) %>%
+                                tab_spanner(label = "Test Summary",
+                                            columns = c("Test Summary", "-"))
+table1
+```
+
+```{r echo=FALSE, results='asis'}
+# Cleaned Data Set Summary
+df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/ML_Results.xlsx"))
+
+table1 <- gt(df3)
+table1 <- table1 %>% tab_header(title = md("ML Models"),
+                                subtitle = md("*Comparison of Results*"))
+
+table1
+```
+
 
 end of document
