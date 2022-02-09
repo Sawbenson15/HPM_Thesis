@@ -5,10 +5,10 @@ author: "Sawyer M. Benson"
 date: "December 21, 2021"
 output:
   html_notebook: default
-  word_document: default
   html_document:
     df_print: paged
   pdf_document: default
+  word_document: default
 bibliography: library.bib
 link-citations: yes
 ---
@@ -65,9 +65,11 @@ thesis is to investigate the reasons behind why and how real estate market price
 uncharacteristically counter cyclical in the face of a global pandemic.
 
 <br>
+
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
 </center>
+
 <br>
 
 In the following sections, I will apply the Hedonic Pricing Method (HPM) to Louisiana housing market data in order to inferentially describe the economic impact of the global pandemic on residential housing market values. Furthermore, I will take advantage of the HPM's structural framework of using real estate properties' hedonic features (e.g., size, age, number of bedrooms, etc.) to test for changes in demand for specific property features pre vs post pandemic. The HPM will be econometrically modeled using an Ordinary Least Squares (OLS) regressions framework for specific variable analysis while several variations of machine learning (ML) prediction models will be estimated to test different independent variables' maximum explanatory power in predicting out-of-sample observations. The results of these models will shed light into the otherwise counter intuitive response of real estate pricing dynamics to the COVID-19 global pandemic.    
@@ -158,162 +160,6 @@ The utilization of Big Data collected through a data-mining process called *web-
 
 In this thesis, I have used a mixture of the programming languages R and Python, supplemented by several packages created by Selenium, to write an algorithm that collects the required hedonic variables for this research from the Multiple Listing Services (MLS). **Table 1** is a summary of the original data set's key features.
 
-<br>
-
-```{r load-packages, include=FALSE}
-library(dplyr)
-library(magrittr)
-library(knitr)
-library(knitr)
-#library(kableExtra)
-library(readxl) # Import excel data frames
-library(tidyverse)
-library(dplyr)
-library(tinytex)
-library(readxl) # Import excel data frames
-library(ggplot2) # Graphs
-library(scales) # Scale range of ggplots 
-library(ggfortify) # Additional ggplot2 functionality
-library(olsrr) # Testing for heteroscedasticity
-library(lmtest) # Testing for heteroscedasticity using breuch-pagan
-library(sandwich) # Amending heteroskedasticity 
-library(mcvis) # Visualizing multicollinearity
-library(gridExtra) # Organize graphs
-library(dplyr) # data_factor wrangling
-library(tidyr) # data_factor wrangling
-library(tinytex) #for RMarkdown
-library(openxlsx) #Export data frame into Excel
-library(ggeffects) # plotting marginal effects
-library(sjPlot) # plotting marginal effects
-library(stargazer) # Showing several outputs next to each other in a STATA style
-library(modelsummary) # Showing several outputs next to each other in a STATA style
-library(regclass) # for testing multicollinearity using VIF
-library(jtools) # cleaner regression output (e.g. summ(lm) 
-library(tidyverse) # data cleaning
-library(hrbrthemes) # special boxplots
-library(viridis) # special boxplots
-library(plotly) # For 3D plotting in ggplot2
-library(reshape2) # Corr heatmap
-library(gt)
-
-
-#detach("package:kableExtra", unload=TRUE)
-#detach("package:knitr", unload=TRUE)
-
-# Import and attach data sets
-data_factor <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/3. data_factor_cleaned.xlsx")
-attach(data_factor)
-
-# Convert Char to Factors with N Levels
-# Structure Change
-data_factor$property_type <- as.factor(data_factor$property_type)
-data_factor$ac_type <- as.factor(data_factor$ac_type)
-data_factor$patio <- as.factor(data_factor$patio)
-data_factor$school_general <- as.factor(data_factor$school_general)
-data_factor$pool <- as.factor(data_factor$pool)
-data_factor$roof_type <- as.factor(data_factor$roof_type)
-data_factor$gas_type <- as.factor(data_factor$gas_type)
-data_factor$out_building <- as.factor(data_factor$out_building)
-
-data_factor$appliances <- as.factor(data_factor$appliances)
-data_factor$garage <- as.factor(data_factor$garage)
-data_factor$property_condition <- as.factor(data_factor$property_condition)
-data_factor$energy_efficient <- as.factor(data_factor$energy_efficient)
-data_factor$exterior_type <- as.factor(data_factor$exterior_type)
-data_factor$exterior_features <- as.factor(data_factor$exterior_features)
-data_factor$fireplace <- as.factor(data_factor$fireplace)
-data_factor$foundation_type <- as.factor(data_factor$foundation_type)
-data_factor$beds_total <- as.factor(data_factor$beds_total)
-data_factor$bath_full <- as.factor(data_factor$bath_full)
-data_factor$bath_half <- as.factor(data_factor$bath_half)
-data_factor$sewer_type <- as.factor(data_factor$sewer_type)
-data_factor$property_style <- as.factor(data_factor$property_style)
-data_factor$subdivision <- as.factor(data_factor$subdivision)
-data_factor$water_type <- as.factor(data_factor$water_type)
-data_factor$waterfront <- as.factor(data_factor$waterfront)
-data_factor$sold_date <- openxlsx::convertToDate(data_factor$sold_date)
-data_factor$sold_date <- as.numeric(data_factor$sold_date)
-
-str(data_factor)
-
-# Splits
-data_factor$city_limits <- as.factor(data_factor$city_limits)
-data_factor$corona_date_split <- as.factor(data_factor$corona_date_split)
-data_factor$top25_sold_price <- as.factor(data_factor$top25_sold_price)
-data_factor$bottom25_sold_price <- as.factor(data_factor$bottom25_sold_price)
-data_factor$top25_area_living <- as.factor(data_factor$top25_area_living)
-data_factor$bottom25_area_living  <- as.factor(data_factor$bottom25_area_living)
-data_factor$top25_age <- as.factor(data_factor$top25_age)
-data_factor$bottom25_age <- as.factor(data_factor$bottom25_age)
-data_factor$top25_dom <- as.factor(data_factor$top25_dom)
-data_factor$bottom25_dom <- as.factor(data_factor$bottom25_dom)
-data_factor$infections_period <- as.numeric(data_factor$infections_accum > 1000)
-data_factor$infections_period <- as.factor(data_factor$infections_period)
-
-str(data_factor)
-
-# Remove this weird '20' level is bath_full
-levels(data_factor$bath_full)
-is.na(data_factor$bath_full) <- data_factor$bath_full == "20"
-data_factor$bath_full <- factor(data_factor$bath_full)
-levels(data_factor$bath_full)
-
-# Remove beds_total > 5
-levels(data_factor$beds_total)
-is.na(data_factor$beds_total) <- data_factor$beds_total == "7" 
-data_factor$beds_total <- factor(data_factor$beds_total)
-is.na(data_factor$beds_total) <- data_factor$beds_total == "6" 
-data_factor$beds_total <- factor(data_factor$beds_total)
-levels(data_factor$beds_total)
-
-
-
-levels(data_factor$beds_total)
-levels(data_factor$bath_full)
-levels(data_factor$bath_half)
-
-# Data frame without Split Vars
-names(data_factor)
-data_factor_core <- data_factor[-c(36:47)]
-data_factor_core <- subset(data_factor_core, select = -c(city_limits, mls_number, infections_period))
-str(data_factor_core)
-names(data_factor_core)
-
-
-
-```
-
-```{r echo=FALSE, results='asis'}
-
-library(readxl) # Import excel data frames
-df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
-df1 <- df1[,1:2]
-colnames(df1) <- c("Name", "Information")
-
-
-table1 <- gt(df1)
-table1 <- table1 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-table1
-```
-<br>
-
-```{r echo=FALSE, results='asis'}
-# Table 2
-df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
-df2 <- df2[,1:3]
-colnames(df2) <- c("Variable Type", "Variables", "Observations")
-
-table2 <- gt(df2)
-table2 <- table2 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-table2
-
-# Joining Code
-# Under construction
-
-```
-
 #### 3.2 Data Processing
 
 Though the data-collecting algorithms return structured data, it is nevertheless far from being suitable for the rather picky
@@ -330,95 +176,46 @@ into a usable form:
 6. **Structural errors** (e.g. dates structured as string variable) were corrected
 7. **Binary variables** were created for key variables (e.g. city_limits) by the following standard method:
 
-$$I\left(y\right)=\left\{\begin{array}{ll}1,\quad x\in A\\0, \quad x \notin A\end{array}\right.,$$
+$$
+I\left(y\right)=\left\{\begin{array}{ll}1,\quad x\in A\\0, \quad x \notin A\end{array}\right.,
+$$
 Where $I$ is an indicator function with space $A$ that composes dummy variable $x$ into $1$ if the condition is met and into $0$ if it is not.
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Data_table_1.png){width=40%}
+</center>
 
 <br>
 
 The results of the data cleaning processes cane be seen in **table 2**.
 
-```{r echo=FALSE, results='asis'}
-# Cleaned Data Set Summary
-df1 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Table_Data_Gen_Diminsions.xlsx"))
+<br>
 
-table1 <- gt(df1)
-table1 <- table1 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-table1
-```
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Data_table_2.png){width=60%}
+</center>
 
 <br>
 
-```{r echo=FALSE, results='asis'}
-# Cleaned Data Structure Overview
-df2 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/table_data_dimensions_original.xlsx"))
-df2 <- df2 %>% select(1, 4:5)
-
-colnames(df2) <- c("Variable Type", "Variables", "Observations")
-
-table2 <- gt(df2)
-table2 <- table2 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-table2
-
-```
 
 
 
 #### 3.3 Variable List
 
-```{r echo=FALSE, results='asis'}
-# Cleaned Data Set Summary
-df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/Variable_table.xlsx"))
+<br>
 
-table1 <- gt(df3)
-table1 <- table1 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Var_list_com.png){width=100%}
+</center>
 
-table1
-```
+<br>
+
 
 <br><br>
 
 #### 3.3 Data Distriptive Statistics
-
-```{r include=FALSE}
-library(readxl) # Import excel data frames
-library(ggplot2) # Graphs
-library(scales) # Scale range of ggplots 
-library(ggfortify) # Additional ggplot2 functionality
-library(olsrr) # Testing for heteroscedasticity
-library(lmtest) # Testing for heteroscedasticity using breuch-pagan
-library(sandwich) # Amending heteroskedasticity 
-library(mcvis) # Visualizing multicollinearity
-library(gridExtra) # Organize graphs
-library(dplyr) # data_factor wrangling
-library(tidyr) # data_factor wrangling
-library(tinytex) #for RMarkdown
-library(openxlsx) #Export data frame into Excel
-library(ggeffects) # plotting marginal effects
-library(sjPlot) # plotting marginal effects
-library(stargazer) # Showing several outputs next to each other in a STATA style
-library(modelsummary) # Showing several outputs next to each other in a STATA style
-library(regclass) # for testing multicollinearity using VIF
-library(jtools) # cleaner regression output (e.g. summ(lm) 
-library(tidyverse) # data cleaning
-library(hrbrthemes) # special boxplots
-library(viridis) # special boxplots
-library(plotly) # For 3D plotting in ggplot2
-library(reshape2) # Corr heatmap
-
-# Colors
-very_low <- "#460f5c"
-low <- "#2c728e"
-med <- "#27ad81"
-high <- "#f4e61e"
-
-# Import and attach data sets
-# Upload and process data_factor from OLS_Thesis
-
-```
-
 ##### 3.3.1 Correlation 
 
 The correlation matrix between all numeric variables shows that with exception to the variables which will have obvious correlations (e.g. sold_price and list_price, area_total and area_living, and infections figures), there are no other correlations which would cause concern.
@@ -482,21 +279,9 @@ A Breusch-Pagan test was conducted on a standard linear regression model with so
 
 <br>
 
-```{r echo=FALSE, warning=FALSE}
-df <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/BP_Test.xlsx"))
-#df <- df[1,1]
-
-table1 <- gt(df)
-table1 <- table1 %>% tab_header(title = md("Breusch Paga Test for Heteroskedasticity"),
-                                subtitle = md("*Hypotheses*")) %>%
-                                tab_style(style = "padding-top:12px;padding-bottom:12px;",
-                                locations = cells_column_labels()) %>%
-                                tab_spanner(label = "Hypotheses",
-                                            columns = c(Hypotheses)) %>%
-                                tab_spanner(label = "Test Summary",
-                                            columns = c("Test Summary", "-"))
-table1
-```
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/bp_test.png){width=50%}
+</center>
 
 <br>
 
@@ -704,16 +489,9 @@ Since a method of model fitting and evaluation has been established in the previ
 
 <br>
 
-```{r echo=FALSE, results='asis'}
-# Cleaned Data Set Summary
-df3 <- suppressMessages(read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Tables/ML_Results.xlsx"))
-
-table1 <- gt(df3)
-table1 <- table1 %>% tab_header(title = md("Variable List"),
-                                subtitle = md("*Structure and short discription*"))
-
-table1
-```
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/ml_results.png){width=40%}
+</center>
 
 <br>
 
@@ -777,7 +555,7 @@ Since the XGBoost machine requires only numerical data, factor data must be conv
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/One-Hot_Encoding.png){width=90%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/One_hot_table.png){width=90%}
 </center>
 
 <br>
@@ -788,9 +566,7 @@ Once the model is fitted to the data, the next procedure is to tune the hyperpar
 
 ##### 4.4.7 XGBoost Partial Dependency Plots
 
-Partial dependency plots (PDP) shows relationship, or dependence, between the model's response variable (i.e. $sold \ price$) and a chosen variable, or set of variables, of interests (VoI), resulting in the graphical representation of a variables marginal contribution to the machine's prediction across the variable of interest's entire range. In order to analyze the results of the XGBoost machine at the variable-by-variable level, I have generate a panel of four graphical partial dependency plots for each variable of interest. Thesis will be the following: Basic PDP plot, Individual Conditional Expectation (ICE) plots, PDP heatmap with VoI against corona infection, 3-dimensional PDP heatmap with VoI against corona infection. 
-
-Image XX shows an example of each graph 
+Partial dependency plots (PDP) shows relationship, or dependence, between the model's response variable (i.e. $sold \ price$) and a chosen variable, or set of variables, of interests (VoI), resulting in the graphical representation of a variables marginal contribution to the machine's prediction across the variable of interest's entire range. In order to analyze the results of the XGBoost machine at the variable-by-variable level, I have generate a panel of four graphical partial dependency plots for each variable of interest. Thesis will be the following: Basic PDP plot, Individual Conditional Expectation (ICE) plots, PDP heatmap with VoI against corona infection, 3-dimensional PDP heatmap with VoI against corona infection. An example of each of these graphs, using days on market as the variable of focus, can be seen in quadrants IV, I, III, and II respectively.
 
 <br>
 
@@ -825,67 +601,60 @@ Image XX shows an example of each graph
 
 <br>
 
-#### 5.4 Covid-19: Premium for Relative Price Levels 
-> **Hypothesis IV:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
->
-> **Reasoning:** Households who live in the top 25th percentile of home prices are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium willing to pay for additonal hedonic features.  
+#### 5.4 Covid-19: Premium for Size
 
-<br>
-
-#### 5.5 Covid-19: Premium for Size
-
-> **Hypothesis V:** The Covid-19 crisis increased the premium for property size 
+> **Hypothesis IV:** The Covid-19 crisis increased the premium for property size 
 >
 > **Reasoning:** Same as for hypothesis I
 
 <br>
 
-> **Hypothesis VI:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
+> **Hypothesis V:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
 >
 > **Reasoning:** Households who live in the top 25th percentile of home sizes are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium they are willing to pay for additonal hedonic features.
 
 <br>
 
-#### 5.6 Covid-19: Premium for Age 
+#### 5.5 Covid-19: Premium for Age 
 
-> **Hypothesis VII:** The Covid-19 crisis increased the premium for property age 
+> **Hypothesis VI:** The Covid-19 crisis increased the premium for property age 
 >
 > **Reasoning:** As the volocity of home sales increase, the general relationship between property age and price is expected to be exasterbated as those upgrading houses will shit towards newer properties
 
 <br>
 
-> **Hypothesis VIII:** The Covid-19 crisis impacted properties in the top 25th percentile of age more than the bottom 25th percentile  
+> **Hypothesis VII:** The Covid-19 crisis impacted properties in the top 25th percentile of age more than the bottom 25th percentile  
 >
 > **Reasoning:** The premium for the youngest (i.e. newest) properties is expected to increase while the premium for the oldest properties is expected to decrease. As the market shifts towards newer properties, they must necissarily shift away from older properties.
 
 <br>
 
-#### 5.7 Covid-19: Change in Days on Market
+#### 5.6 Covid-19: Change in Days on Market
 
-> **Hypothesis IX:** The Covid-19 crisis significantly impacted the premium for days on market 
+> **Hypothesis VIII:** The Covid-19 crisis significantly impacted the premium for days on market 
 >
 > **Reasoning:** As the volocity of home sales increase, more homes are sold faster, and therefore the number of days on the market becomes less of a predictor of quality since even lower quality and over-priced homes are sold more quickly. 
 
 <br>
 
-> **Hypothesis X:** The Covid-19 crisis impacted properties in the top 25th percentile of days on market more than the bottom 25th percentile 
+> **Hypothesis IX:** The Covid-19 crisis impacted properties in the top 25th percentile of days on market more than the bottom 25th percentile 
 >
 > **Reasoning:** The premium for a property being sold within the top 25th percentile of days on market (DOM), i.e. the properties which sit on the market the logest, is expected to be disproportionately effected when compared homes which sold the fastest, as households elasticity of demand for specific characteristics decreses relative to price, it will take larger deviation in price and quality to make a home sell in the top 25th percentile of DOM 
-
 
 
 <br><br>
 
 ### 6. Results
-This section will follow a clear and consistent structure for each subsection of results. Each hypothesis will have: A *general overview* of the characteristic being modeled and; *model results* with standard hypothesis conclusion(s). 
+This section will follow a clear and consistent structure for each set of results. Each hypothesis will have: A *summary of the finding*; *feature review* of the characteristic being modeled; and *model results* from the OLS and ML models with standard hypothesis conclusion(s). 
 
 <br>
 
 #### 6.1 Covid-19: General Case
 ##### 6.1.1 Summary of Findings
-> Preliminary analysis of housing prices and daily infections reveals a positive historical relationship between these two key variables. This relationship is strongly supported by the XGBoost ML algorithm, which shows that a maximal reduction in predictions error is acheived by increasing the prediciton price at all levels of daily infections > 0, holding all other factors constant. XGBoost determines that from the 104 total variables, daily infections is the 19th most important variable in reducing price prediction error.  
+
+> Preliminary analysis of housing prices and daily infections reveals a positive historical relationship between these two key variables. This relationship is strongly supported by the XGBoost ML algorithm, which shows that a maximal reduction in predictions error is acheived by increasing prediciton price at all levels of daily infections greater than 0, holding all other factors constant. XGBoost also determined that from the 104 total variables used, daily infections is the 19th most important variable in reducing price prediction error.  
 >
-> Furthermore, in the fully controlled Alpha model, the beta coefficient for daily infections suggests that each additional infection is associated with an average home price *increase of $8.97*, ceteris parabus. This finding is significant at the *p < 0.00* level.  
+> In the fully controlled Alpha model, the beta coefficient for daily infections suggests that each additional infection is associated with an average home price *increase of $8.97*, ceteris parabus. This finding is significant at the *p < 0.00* level. Therefore, we reject $H_0: beta_{infections_3mma} = 0$. I conclude that the Covid-19 crisis significantly increased housing prices Hypothesis I).
 
 ##### 6.1.2 Visual Review
 We first look at the distribution of daily infections and the accumulation of infections across time. The variation in historical daily infections should provide a strong measurement for explaining variations in price related to this key variable. 
@@ -898,7 +667,7 @@ We first look at the distribution of daily infections and the accumulation of in
 
 <br>
 
-Looking at the raw historical relationship between infections rates and prices, we look at the trend line of price vs daily infections (rhs) and a comparison between the price distributions of pre and post-infections period (lhs), we see historically positive relationship between infections and price. Though these graphs are promising, it is unclear if other factors could be influencing this relationship. To establish  
+To investigate the raw historical relationship between infections rates and prices, we look at the trend line of price vs daily infections (rhs) and a comparison between the price distributions of pre and post-infections period (lhs). These analysis suggests a historically positive relationship between infections and price. Though these graphs are promising, it is unclear if other factors could be influencing this relationship. To establish a statistical relationship, we turn to the following OLS and ML models.  
 
 <br>
 
@@ -909,11 +678,11 @@ Looking at the raw historical relationship between infections rates and prices, 
 <br>
 
 ##### 6.1.3 OLS Modeling
-Since displaying the full OLS output for ever section is impractical, I will include a summarized version with the only the key variables included. Please note that if you wish to see each regression output table, code, and data associated with this thesis, you can visit my GitHub repository with the following link: https://github.com/Sawbenson15/HPM_Thesis.
+Since displaying the full OLS output for every set of results is impractical, I will include a summarized version with only the key variables included. Please note that if you wish to see each regression output table, code, and data associated with this thesis, you can visit my public GitHub repository with the following link: https://github.com/Sawbenson15/HPM_Thesis.
 
-> In the fully controlled Alpha model, the beta coefficient for daily infections shows that each additional infection is associated with an average home price *increase of $8.97*, ceteris parabus. This finding is significant at the *p < 0.00* level   
+> In the fully controlled Alpha model, the beta coefficient for daily infections suggest that each additional infection is associated with an average home price *increase of $8.97*, ceteris parabus. This finding is significant at the *p < 0.00* level. I therefore reject the $H_0$ of Hypothesis I, concluding that the Covid-19 crisis significantly increased housing prices.   
 
-This foundational finding lays the groundwork for the following results, which attempt to explain the significant relationship between infections and price at the level of individual hedonic variables.  
+This foundational finding lays the groundwork for the following results, which attempt to explain the significant relationship between infections and price at the level of individual hedonic variables.
 
 <br>
 
@@ -923,7 +692,7 @@ This foundational finding lays the groundwork for the following results, which a
 
 <br><br>
 
-The following graphic shows the historical trend line for infection vs sold price with 1SD error margins (grey), the best single-variable fit (green), and the marginal fit of the Alpha model (blue). We see that the controls of the Alpha model have flatten the marginal effect of each additional infection on price, however, this relationshiip remains positive and significant, as previously established.  
+The following graphic shows the historical relationship between daily infections and sold price with a 1SD error margin at all point (in grey), the best single-variable fit (in green), and the Alpha model's marginal fit (in blue). We see that the many controls of the Alpha model flatten the estimated marginal effect of each additional daily infection on price, however, this relationshiip remains positive and significant, as previously established.  
 
 <br>
 
@@ -934,9 +703,9 @@ The following graphic shows the historical trend line for infection vs sold pric
 <br>
 
 ##### 6.1.4 ML Modeling
-To further test the relevance of corona infections in determining prices, we look at this variable's relative ranking based it's ability to improve out-of-sample predictions within our XGboost model. This measurment is called Variable Importance. 
+To further test the relevance of corona infections in determining prices, we look at this variable's relative ranking based it's ability to improve out-of-sample predictions within our XGboost model. The measurement used is called Variable Importance and is defined by a combination of gain, cover, and frequency. Gain is how much prediction power is gained when the variable is added to the model; cover is how heavily the variable is weighted in each iteration, and frequency is how frequently the variable appears across all iterations. 
 
-We see that of the 104 unique variables offered to the XGBoost machine, the 3-month moving average of infection was the 19th most descriptive variable in predicting prices. This is an very strong confirmation that the relationship found in the OLS model is correct. 
+We see that of the 104 unique variables offered to the XGBoost machine, the 3-month moving average of infection was the 19th most descriptive variable in predicting prices. I consider this results non-trivial and a very strong confirmation that the relationship found in the OLS model is correct. 
 
 <br>
 
@@ -944,9 +713,9 @@ We see that of the 104 unique variables offered to the XGBoost machine, the 3-mo
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Corona_General/Var_Importance.png){width=90%}
 </center>
 
-To get a detailed understanding of the marginal effect each additional infection has on price through, we look at the PDP and the ICE of infections and price. The PDP (top) shows the optimal price change w.r.t. daily infections which minimize the model's test MSE. The ICE (bottom) is the individual PDP for every observation in the dataset, centered at infection = 0. This allows us to understand the simple PDP in more detail and also to pick up on any signs of heteroskedasticity amoung individual sample predictions. 
+To get a detailed understanding of the marginal effect each additional daily infection has on price through, we look at the PDP and the ICE of infections and price. The PDP (top) shows the optimal price change w.r.t. daily infections which minimize the model's test MSE. The ICE (bottom) is the individual PDP for every observation in the dataset, centered at infection = 0. The ICE allows us to understand the simple PDP, which is an everage of the individual ICEs, in more detail and also to pick up on any signs of heteroskedasticity among the individual sample predictions. 
 
-The PDP shows that on average, an increase in price at every level of daily infections > 0 reduces test MSE. Furthermore, this trend is generally upward facing, with a notable range of response between 1,800 and 2,500 infections, which I refered to as the *infections-price ridge.* Discussions regarding possible explanations for the general shape of this region will be explored in section 7.     
+The PDP shows that on average, an increase in price at every level of daily infections > 0 reduces test MSE. Furthermore, this trend is generally upward trending, with a notable range of response between 1,800 and 2,500 infections, which I refer to as the *infections-price ridge.* Discussions regarding possible explanations for the general shape of this region will be explored in section 7.     
 
 <br>
 
@@ -957,13 +726,12 @@ The PDP shows that on average, an increase in price at every level of daily infe
 <br>
 
 #### 6.2 Covid-19: Premium for Bedrooms
-##### 6.2.1 Summary of Findings
+Foreword for this section: There are two contextual details which must be considered for one to appropriatly interpret the following findings. First, the variables for total number bedrooms and the total living area of a home are highly correlated, and therefore when total living area is included, the beta coefficients for each level of bedroom represents only the premium homeowners are willing to pay for the actual feature of an extra bedroom at a fixed living area, and not the extra living area itself. As this results in convoluted results, living area is excluded when testing the effect of bedrooms. This effectivly measures the additional room and the average addition of living area associated with that additional room. Secondly, the OLS results listed below represent the change in the beta coefficients from post and pre corona, not the absolute effect, as in the case of measuring daily infection alone. 
 
-> There are two contextual details which must be considered for one to appropriatly interpret the following findings. First, number of bedrooms and the total living area of a home are highly correlated, and therefore when total living area is included, the beta coefficients for each level of bedroom represents only the premium homeowners are willing to pay for the actual feature of an extra bedroom, and not the extra living area itself. This will make premiums seem low. Secondly, the OLS results listed below represent the change in the beta coefficients from post and pre corona, not the absolute effect, as in the case of measuring daily infection alone.     
+##### 6.2.1 Summary of Findings
+> Prelimilary finding show that the price distribution for every level of number of bedrooms increased after the beginning of the infection period (i.e. accumulation of infections >= 1000), as predicted. The average number of total bedrooms between pre and post-infections period are effectivly equal, with post-infections period being 0.003 higher. However, the key finding is in the change in premium for each level of number of bedrooms.    
 >
-> Prelimilary finding show that the price distribution for every level of number of bedrooms increased after the beginning of the infection period (i.e. accumulation of infections >= 1000)
->
-> The fully controled Alpha model results show that the premium for each level of number of bedrooms modestly increased in response to daily infection. Every corona-driven increase is significant at the p < 0.05 level except for single bedroom homes. Possible theories for why this shift happened is explored in section 7.
+> The fully controled Alpha model results show that the everage premium for each level of number of bedrooms significantly increased in response to increases in daily infections. Every increase found is at least significant at the p < 0.05 level except for single bedroom homes. Therefore, I reject the $H_0:$ of hypothesis II and conclude that the Covid-19 crisis significantly increased demand-premiums for every level of bedrooms. Possible theories regarding this significant shift in premiums is explored in section 7.
 
 
 ##### 6.2.2 Visual Review
