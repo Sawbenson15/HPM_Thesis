@@ -17,8 +17,12 @@ link-citations: yes
 <br><br>
 
 ### Check List
+
 * Check section numbering
 * Spell check
+* Use same term for corona the whole way through
+* Check for plagiarism 
+* Make video explaining thesis for prof. grading
 
 <br><br>
 
@@ -67,7 +71,7 @@ uncharacteristically counter cyclical in the face of a global pandemic.
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/gdp_gen.png){width=70%}
 </center>
 
 <br>
@@ -239,11 +243,20 @@ As the standard descriptive characteristics of a particular variable are conside
 ##### 3.3.3 Price Index
 Under Construction
 
+<br>
+
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Index.png){width=90%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/index_la.png){width=90%}
 </center>
 
+<br>
+<br>
 
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/gdp_la.png){width=90%}
+</center>
+
+<br>
 
 <br><br>
 
@@ -438,7 +451,7 @@ In the previous subsection 4.1, it was stated that the multivariable regression 
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/ML_Process.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/ML_Process_2.png){width=70%}
 </center>
 
 <br>
@@ -459,7 +472,7 @@ $$CV_{vsa} = MSE_{vsa}$$
 
 <center>
 
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Val_Sets.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Val_Set.png){width=50%}
 </center>
 
 <br>
@@ -475,12 +488,12 @@ $$CV_{k-fold} = \frac{1}{k}\sum_{t=1}^{k} MSE_i$$
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/K-Fold.png){width=50%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/K_Fold.png){width=50%}
 </center>
 
 <br>
 
-##### 4.4.4 Model Selection 
+##### 4.4.4 ML Model Selection 
 For this thesis, ML models will be ranked based on two features: Accuracy, as measured by test MSE, and interpretability, qualitatively defined by the model's ability to provide insights into to which features are relevant to the ability to make correct predictions, and by how much are they relevant.
 
 *Accuracy*
@@ -588,16 +601,16 @@ Partial dependency plots (PDP) shows relationship, or dependence, between the mo
 <br>
 
 #### 5.2 Covid-19: Premium for Bedrooms
-> **Hypothesis II:** The Covid-19 crisis significantly increased demand-premiums for every level of bedrooms 
+> **Hypothesis II:** The Covid-19 crisis significantly increased demand-premiums for every level of number of bedrooms greater than 1 
 >
-> **Reasoning:** As many workers have perminantly shifted to remote work, the premium for an additional bedroom is expected to increase across each level of total_beds as households need additional rooms for homeoffices and other activities.  
+> **Reasoning:** As many workers have perminantly shifted to remote work, the premium for an additional bedroom is expected to increase across each level of total number of bedrooms as households need additional rooms for homeoffices and other activities. The premium for a single bedroom is expected to be insignificant since there are no recorded 0-bedroom houses to upgrade from.
 
 <br>
 
 #### 5.3 Covid-19: Premium for City Centrality
 > **Hypothesis III:** The Covid-19 crisis impacted properties within city limits more than those not within city limits  
 >
-> **Reasoning:** As workers who live in city limits have jobs more likely to be compateble with remote work, such as jobs within the financial industry, home prices within city limits are disproporsionatly impacted by the shift to remote work.
+> **Reasoning:** As workers who live in city limits are expected to hold jobs more likely to be compateble with remote work, such as jobs within the financial industry, home prices within city limits are disproporsionatly impacted by the shift to remote work.
 
 <br>
 
@@ -609,7 +622,7 @@ Partial dependency plots (PDP) shows relationship, or dependence, between the mo
 
 <br>
 
-> **Hypothesis V:** The Covid-19 crisis impacted properties in the top 25th percentile of price more than the bottom 25th percentile 
+> **Hypothesis V:** The Covid-19 crisis impacted properties in the top 25th percentile of property size more than the bottom 25th percentile 
 >
 > **Reasoning:** Households who live in the top 25th percentile of home sizes are more likely to hold white-collar jobs, which are more likely to be made remote, which increases the premium they are willing to pay for additonal hedonic features.
 
@@ -617,7 +630,7 @@ Partial dependency plots (PDP) shows relationship, or dependence, between the mo
 
 #### 5.5 Covid-19: Premium for Age 
 
-> **Hypothesis VI:** The Covid-19 crisis increased the premium for property age 
+> **Hypothesis VI:** The Covid-19 crisis decreased the premium for property age 
 >
 > **Reasoning:** As the volocity of home sales increase, the general relationship between property age and price is expected to be exasterbated as those upgrading houses will shit towards newer properties
 
@@ -631,7 +644,7 @@ Partial dependency plots (PDP) shows relationship, or dependence, between the mo
 
 #### 5.6 Covid-19: Change in Days on Market
 
-> **Hypothesis VIII:** The Covid-19 crisis significantly impacted the premium for days on market 
+> **Hypothesis VIII:** The Covid-19 crisis significantly decreased the premium for days on market 
 >
 > **Reasoning:** As the volocity of home sales increase, more homes are sold faster, and therefore the number of days on the market becomes less of a predictor of quality since even lower quality and over-priced homes are sold more quickly. 
 
@@ -715,7 +728,7 @@ We see that of the 104 unique variables offered to the XGBoost machine, the 3-mo
 
 To get a detailed understanding of the marginal effect each additional daily infection has on price through, we look at the PDP and the ICE of infections and price. The PDP (top) shows the optimal price change w.r.t. daily infections which minimize the model's test MSE. The ICE (bottom) is the individual PDP for every observation in the dataset, centered at infection = 0. The ICE allows us to understand the simple PDP, which is an everage of the individual ICEs, in more detail and also to pick up on any signs of heteroskedasticity among the individual sample predictions. 
 
-The PDP shows that on average, an increase in price at every level of daily infections > 0 reduces test MSE. Furthermore, this trend is generally upward trending, with a notable range of response between 1,800 and 2,500 infections, which I refer to as the *infections-price ridge.* Discussions regarding possible explanations for the general shape of this region will be explored in section 7.     
+The PDP shows that on average, an increase in price at every level of daily infections > 0 reduces test MSE. Furthermore, this trend is generally upward trending, with a notable range of response between 1,800 and 2,500 infections, which I refer to as the *infection-price ridge.* Discussions regarding possible explanations for the general shape of this region will be explored in section 7.     
 
 <br>
 
@@ -726,26 +739,31 @@ The PDP shows that on average, an increase in price at every level of daily infe
 <br>
 
 #### 6.2 Covid-19: Premium for Bedrooms
-Foreword for this section: There are two contextual details which must be considered for one to appropriatly interpret the following findings. First, the variables for total number bedrooms and the total living area of a home are highly correlated, and therefore when total living area is included, the beta coefficients for each level of bedroom represents only the premium homeowners are willing to pay for the actual feature of an extra bedroom at a fixed living area, and not the extra living area itself. As this results in convoluted results, living area is excluded when testing the effect of bedrooms. This effectivly measures the additional room and the average addition of living area associated with that additional room. Secondly, the OLS results listed below represent the change in the beta coefficients from post and pre corona, not the absolute effect, as in the case of measuring daily infection alone. 
+*Foreword for this section:*
+
+There are two contextual details which must be considered for one to appropriately interpret the following findings. First, the variables for total number bedrooms and the total living area of a home are highly correlated, and therefore when total living area is included in the OLS model, the beta coefficients for each level of number of bedrooms represents the premium homeowners are willing to pay for the actual feature of an extra bedroom at a fixed living area, and not the extra living area itself. As this results in convoluted results, living area is excluded when testing the effect of bedrooms. This effectively measures the additional room and the average additional living area associated with that additional room at each level (e.g. from 1 bedroom to 2, 2 to 3, etc.). Secondly, the OLS results listed below represent the change in the premiums (i.e. beta coefficients) from post vs. pre corona and not the absolute price premiums, as in the case of measuring daily infection alone. 
 
 ##### 6.2.1 Summary of Findings
-> Prelimilary finding show that the price distribution for every level of number of bedrooms increased after the beginning of the infection period (i.e. accumulation of infections >= 1000), as predicted. The average number of total bedrooms between pre and post-infections period are effectivly equal, with post-infections period being 0.003 higher. However, the key finding is in the change in premium for each level of number of bedrooms.    
+
+Note: add xgboost results
+
+> Prelimilary findings show that the price distribution for every level of number of bedrooms increased after the beginning of the infection period (i.e. accumulation of infections >= 1000), as predicted. The average number of total bedrooms between pre and post-infections period deviate slightly, with post-infections period being 0.003 higher. However, the key focus of this section is not absolute changes in the feature *number of bedrooms*, but rather in the change in premium for each level of number of bedrooms.    
 >
-> The fully controled Alpha model results show that the everage premium for each level of number of bedrooms significantly increased in response to increases in daily infections. Every increase found is at least significant at the p < 0.05 level except for single bedroom homes. Therefore, I reject the $H_0:$ of hypothesis II and conclude that the Covid-19 crisis significantly increased demand-premiums for every level of bedrooms. Possible theories regarding this significant shift in premiums is explored in section 7.
+> The fully controled Alpha model results show that the everage premium for each level of number of bedrooms significantly increased in response to increases in daily infections. Every increase found is at least significant at the p < 0.05 level except for single bedroom homes. Therefore, I reject the $H_0:$ of hypothesis II and conclude that the Covid-19 crisis significantly increased demand-premiums for every level of number of bedrooms greater than 1. It should also be noted to the premium increase is increasing larger for at each level, suggesting that the premium for the 4th bedroom in a home increased more than the premium for the 3rd bedroom. Possible theories regarding this significant shift in premiums is explored in section 7.
 
 
 ##### 6.2.2 Visual Review
-General distribution of bedrooms per house
+General distribution of number of bedrooms per residential property.
 
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/bed_dist_gen.png){width=80%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/bed_dist_gen.png){width=70%}
 </center>
 
 <br>
 
-Distributions of price at each number of bedrooms (lhs) and the same plot but split or before and after infections period (rhs)
+Distributions of prices at each level of number of bedrooms (lhs) and the distributions of prices at each level of number of bedrooms split by before and after infection period (rhs).
 
 <br>
 
@@ -755,7 +773,7 @@ Distributions of price at each number of bedrooms (lhs) and the same plot but sp
 
 <br>
 
-However, it is important to remember that size (i.e. total living area) is controlled for in the Alpha model. Therefore, it is more accurate to look at the same two plots above, but normalized per square foot. We see a significant flattening between each number of bedrooms level, however, a distinct change from pre vs post infection period is still visible (rhs). The next section will test if this shift from post to pre-corona is significantly in general, and significantly related to daily infections.
+It is also instructive to look at the same two plots above, but normalized by square footage. We see a significant flattening between each level of number of bedrooms, however, a distinct change from pre vs. post infection period is still visible (rhs). The next section will test if this shift from post to pre-corona is significantly in general, and significantly related to daily infections.
 
 <br>
 
@@ -766,7 +784,7 @@ However, it is important to remember that size (i.e. total living area) is contr
 <br>
 
 ##### 6.2.3 OLS Modeling
-Interpretation under construction
+Under the fully controlled Alpha model, we see that corona-driven premiums changes at ever level of number of bedrooms is statistically significant except for single-bedroom properties. This finding suggest that for every additional 3-month-moving-average daily infection present at the time the property is sold is associated with an average increase of 25, 32, 37, 27, and 47 USD for levels 2-through-5 respectively.      
 
 <br>
 
@@ -777,9 +795,11 @@ Interpretation under construction
 <br>
 
 ##### 6.2.4 ML Modeling
-Due to number of bedrooms being categorical, the results of the XGBoost model for these variables are not as easily visually represented as continuous variables, which have celar PDPs. However, we can consider the results in written form and with importance ranking. 
+Due to number of bedrooms being categorical, the results of the XGBoost model for these variables are not as easily visually represented as continuous variables, which have an easier interpretation through PDPs. However, we can consider the results in written form and with adjusted graphs to represent the importance rankings. 
 
-The variable importance ranking of each factor level from 1-through-5 bedrooms is 84, 60, 47, 34, and 68 respectively. This relatively low relevance is expected, as much of the explanatory power of bedrooms on price is taken by total living area, ranked number 1 in importance.
+The variable importance ranking of each factor level from 1-through-5 bedrooms is 84, 60, 47, 34, and 68 respectively from the total 104 variables used in the model. This relatively low relevance is expected, as much of the explanatory power of bedrooms on price is taken by total living area, ranked number 1 in the importance matrix. However, we see that test MSE is minimized by increasing price at each level of number of bedrooms.
+
+<br>
 
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Beds/beds_importance.png){width=60%}
@@ -788,37 +808,31 @@ The variable importance ranking of each factor level from 1-through-5 bedrooms i
 <br>
 
 #### 6.3 Covid-19: Premium for City Centrality
+*Foreword for this section:*
+
+In this section, it is important to note that a property being within city limits does not mean that it should be viewed as being in the center of a major city. This categorization is better understood as a distinction from properties which are rural, such as properties on farm land and heavily wooded or otherwise remote areas. It should also be noted that results at several levels of analysis will be discussed, such as nonimal differences in the populations, price reactions to daily infections for each sub-population, and the change in premium for being within city limits.    
+
+
 ##### 6.3.1 Summary of Findings
-
-
+> Preliminary analysis of city centrality's impact on home prices shows that homes within city limits have a higher price on average when compared to rural properties. Further visual analysis suggests that prices grew in both sub-populations post vs. pre-infection period, with city-cintral properties experincing the larger nominal shift in average prices. The XGBoost model shows that an increase in prediction price when a property is within city limits maximally reduces the model's test MSE, sugesting this variable is a generally important feature, with a ranking of 42 in the importance matrix.  
+>
+> In the fully controlled Alpha model, the coefficient for daily infections and city limits suggests that each additional infection is associated with an average *increase of $5.17* in the premium for being located within city limits compared to property not within city limits, ceteris parabus. This finding is significant at the *p < 0.00* level. Therefore, I reject the $H_0:$ of hypothesis III and conclude that the Covid-19 crisis impacted properties within city limits more than those not within city limits.
 
 ##### 6.3.2 Visual Review
 <br>
 
-Below we see a leftward shift of the price distribution for properties that are located within city limits (rhs).  
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/total_dist.png){width=100%}
-</center>
-
-<br>
-
-To better understand the effect corona had on properties specifically located within city limits, we further split the city_limits distribution by infection periods. This separation shows a clear  
+To better understand the effect corona had on properties specifically located within city limits, I split the city_limits distribution by infection periods. This separation shows a clear increase in association with the infections period.  
 <br>
 
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/city_dist.png){width=100%}
-</center>
-
-<br>
-<br>
-
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/city_limits_and_corona.png){width=80%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/dist_city_com.png){width=100%}
 </center>
 
 <br>
 
 ##### 6.3.3 OLS Modeling
+First, we look at the main result which tests the change in premium for being within city limits, in constrast to rural properties, before vs. after infection period. This finding shows each additional infection is associated with an average city_limts premium *increase of $5.17* compared to property not within city limits, ceteris parabus. This finding is significant at the *p < 0.00* level.
+
 <br>
 
 <center>
@@ -827,9 +841,20 @@ To better understand the effect corona had on properties specifically located wi
 
 <br>
 
+To further highlight the differences in corona's impact of properties within city limits vs outside of city limits, I ran a separate regression model for each sub-population with all of the standard controls of the Alpha model to see the impact of daily infections on prices. This results shows that properties within city limits (lhs) have an average increase of $9.15 per additional daily infection which is significant at the *p < 0.00* level, while the model for rural properties (rhs) shows that daily infections is not a significant variable in explaining variations in prices. It should also be noted how much smaller the number of observations is in the rural model.   
+
+<br>
+
+<center>
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/OLS_com.png){width=100%}
+</center>
+
+<br>
+
 
 ##### 6.3.4 ML Modeling
 <br>
+The XGBoost PDP of the city_limits dummy variable shows that increasing property value when the property is within city limits maximally reduces test MSE. 
 
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/City_PDP.png){width=50%}
@@ -839,11 +864,14 @@ To better understand the effect corona had on properties specifically located wi
 
 #### 6.4 Covid-19: Premium for Size
 ##### 6.4.1 Summary of Findings
-
-
+> An analysis of size shows that this feature is smoothly distributed across the data set with the average total living area marginally higher in the post-infections period. The XGBoost model rankes this feature as the number one most impartant variable in predicting prices. 
+>
+> In the fully controlled Alpha model, the coefficient for daily infections and total living area suggests that each additional infection is associated with an average premium *increase of $0.02* for total living area, measured per square foot, ceteris parabus. This finding is significant at the *p < 0.00* level. Therefore, I reject the $H_0:$ of hypothesis IV and conclude that the Covid-19 crisis increased the premium for property size.
+>
+> Furthermore, I have run a separate Alpha model for the top and bottom 25th percentile of total living area. These results show that the premium for the smallest homes decreases per additional daily infection (-3.15 USD, p < 0.00), while homes in the top 25th percentile increase with respect to daily infections (-3.15 USD, p < 0.00). This suggests a shift away from smaller homes and towards larger homes in response to the corona crisis. Therefore, I reject the $H_0:$ of hypothesis V and conclude that the Covid-19 crisis impacted properties in the top 25th percentile of property size more than the bottom 25th
 
 ##### 6.4.2 Visual Review
-Total living area 
+Total living area is relatively smoothly distributed across the data set with the average total living area marginally higher in the post-infections period. Since this feature is roughly stable in the short run, this result is expected.
 
 <br>
 
@@ -852,6 +880,8 @@ Total living area
 </center>
 
 <br>
+
+Price distribution, however, differ between pre and post-infection period when normalized by per square foot (sqft.).
 <br>
 
 <center>
@@ -861,6 +891,7 @@ Total living area
 <br>
 
 ##### 6.4.3 OLS Modeling
+The fully controlled Alpha model shows the coefficient for daily infections and total living area suggests that each additional infection is associated with an average premium *increase of $0.02* for total living area, measured per square foot, ceteris parabus. This finding is significant at the *p < 0.00* level.
 
 <br>
 
@@ -870,6 +901,7 @@ Total living area
 
 <br>
 
+To further test this relationship, I have run a separate Alpha model for the top and bottom 25th percentile of total living area. These results show that the premium for the smallest homes decreases per additional daily infection (-3.15 USD, p < 0.00), while homes in the top 25th percentile increase with respect to daily infections (-3.15 USD, p < 0.00). This suggests a shift away from smaller homes and towards larger homes in response to the corona crisis.
 <br>
 
 <center>
@@ -879,6 +911,7 @@ Total living area
 <br>
 
 ##### 6.4.4 ML Modeling
+The PDP and ICE plots show a stable and consistant increase in prices as total living area increases.
 <br>
 
 <center>
@@ -887,6 +920,7 @@ Total living area
 
 <br>
 
+The heatmaps of predicted price with respect to daily infections and total living area show that both variables consistently increase XGBoost's price predictions, with the Maximal Price Region (MPR) at the top 25th percentile of both variables.
 <br>
 
 <center>
@@ -895,10 +929,18 @@ Total living area
 
 <br>
 
-
 #### 6.5 Covid-19: Premium for Age 
 ##### 6.5.1 Summary of Findings
+> A preliminary analysis of age shows that this feature is different in the pre and post-infections periods, with the lower average age of homes sold in the post-infection period suggesting that home owners prefere, on average, newer homes. The XGBoost model rankes this feature as the second most impartant variable in predicting prices. 
+>
+> In the fully controlled Alpha model, the coefficient for daily infections and age suggests that each additional daily infection is associated with an average premium *decrease of $0.06* for each aditional year of age, ceteris parabus. This result can be interpreted as an increase in the penilty per additonal year of age, making older home even more undisirable post-infections period. This finding is significant at the *p < 0.00* level. Therefore, I reject the $H_0:$ of *hypothesis VI* and conclude that The Covid-19 crisis decreased the premium for property age.
+>
+> Furthermore, I have run a separate Alpha model for the top and bottom 25th percentile of age. These results show that the premium for the oldest homes decreases per additional daily infection (-2.75 USD, p < 0.00), while the premium for being in the bottom 25th percentile of age (i.e. newest homes) is not significantly different pre vs post-infection period. This suggests a distinct shift away from older homes in response to the corona crisis. Therefore, I reject the $H_0:$ of *hypothesis VII* and conclude that the Covid-19 crisis impacted properties in the top 25th percentile of property age more than the bottom 25th.
+
+
 ##### 6.5.2 Visual Review
+The graph below highlights the differences in the age distributions between the pre and post infections period groups. We see a decrease in the average age in homes sold in the post-infection period.
+
 <br>
 
 <center>
@@ -908,9 +950,15 @@ Total living area
 <br>
 
 ##### 6.5.3 OLS Modeling
+Alpha model, finds that each additional daily infection is associated with an average premium *decrease of $0.06* for each additional year of age, ceteris parabus. This result can be interpreted as an increase in the penalty per additional year of age, making older home even more undesirable in the post-infections period. This finding is significant at the *p < 0.00* level.
+
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_gen.png){width=50%}
 </center>
+
+<br>
+
+Two separate Alpha models for the top and bottom 25th percentile of age show that the premium for the oldest homes *decreases* per additional daily infection (-2.75 USD, p < 0.00), while the premium for being in the bottom 25th percentile of age (i.e. newest homes) is *not significantly different* pre vs post-infection period. This suggests that home owners shifted distictly away from older homes more than towards newer homes.
 
 <br>
 
@@ -921,11 +969,18 @@ Total living area
 <br>
 
 ##### 6.5.4 ML Modeling
+The XGBoost model's PDP and ICE plots show the expected convexed shape between age and price predictions with an inflection point at approximatly 65 years. Since the vast majority of properties sold in my time sample are between the ages of 0 and 55 years old (94%), the downward relationship between age and price prediciton is most relivent for this paper.   
+
+<br>
+
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Age/age_PDP.png){width=100%}
 </center>
 
 <br>
+
+To better understand the marginal impact of age and daily infections on predicted home prices, we turn to the heat maps below. It can be seen that the highest marginal price additions happen in the region: 0 < age < 10 and 1800 < infections < 2300. 
+
 <br>
 
 <center>
@@ -935,9 +990,21 @@ Total living area
 <br>
 
 #### 6.6 Covid-19: Change in Days on Market
+*Foreword for this section:*
+
+Days on market (DOM) is a strange variable as it is relationship to the final selling price of a home is not unidirectional. This is because the number of days a home sits on the market is greatly determined by the relationship between the original listing price and the actual market value of the home, with over-priced homes taking longer to sell and under-priced homes less time. However, it is also the case that people will to wait for the right buyer to come along will be rewarded by selling their home at a higher price. This feedback loop makes standard econometric interpretations difficult and the folloiwng results in this section should be analyzed with this fact in mind. 
+
 ##### 6.6.1 Summary of Findings
+> A preliminary analysis of DOM shows that this feature noticably shifted in the post-infection period, with the average DOM being lower when campaired to the pre-infections period. Of the 104 variables used to train the XGBoost model, DOM is ranked as the 8th most impartant variable in predicting prices. 
+>
+> In the fully controlled Alpha model, the coefficient for daily infections and DOM suggests that each additional daily infection is associated with an average premium *decrease of $0.04* for each aditional day a property sits on the market before being sold, ceteris parabus. This result can be interpreted as an increase in the penilty per additonal day on the market. This finding is significant at the *p < 0.00* level. Therefore, I reject the $H_0:$ of *hypothesis VIII* and conclude that the Covid-19 crisis significantly decreased the premium for days on market
+>
+> Furthermore, I have run a separate Alpha model for the top and bottom 25th percentile of DOM. These results show that the negative premium for the homes which sat on the market the longest decreased (-2.75 USD, p < 0.00), while the premium for being in the bottom 25th percentile (i.e. homes sold the fastest) is not significantly different pre vs post-infection period. Therefore, I reject the $H_0:$ of *hypothesis IX* and conclude that the Covid-19 crisis impacted properties in the top 25th percentile of property age more than the bottom 25th.
+
+
 ##### 6.6.2 Visual Review
 <br>
+The preliminary graphical analysis of DOM shows a clear average decrease of DOM for homes sold in the post-infection period.
 
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/Dom/dom_dist_com.png){width=100%}
@@ -945,8 +1012,9 @@ Total living area
 
 <br>
 
-
 ##### 6.6.3 OLS Modeling
+Alpha model, the interaction coefficient for daily infections and DOM suggests that each additional daily infection is associated with an average premium *decrease of $0.04* for each additional day a property sits on the market before being sold, ceteris parabus. This result can be interpreted as an increase in the penalty per additonal day on the market. This finding is significant at the *p < 0.00* level. 
+
 <br>
 
 <center>
@@ -954,6 +1022,7 @@ Total living area
 </center>
 
 <br>
+Separate Alpha models for the top and bottom 25th percentile of DOM. These results show that the negative premium for the homes which sat on the market the longest decreased (-2.75 USD, p < 0.00), while the premium for being in the bottom 25th percentile (i.e. homes sold the fastest) is not significantly different pre vs post-infection period.
 
 <br>
 
@@ -963,9 +1032,9 @@ Total living area
 
 <br>
 
-
-
 ##### 6.6.4 ML Modeling
+PDP and ICE graphs show a sharp initial decrease in prediction prices ad then a consistent downward trend. The end behavior at the top of DOM is explained by a small number of observation at the extreme and can therefore be ignored.
+
 <br>
 
 <center>
@@ -973,6 +1042,8 @@ Total living area
 </center>
 
 <br>
+The heatmaps for DOM and daily infections show that properties sold at approximately 0 DOM and within the infection-price ridge are predicted to have the highest price.
+
 <br>
 
 <center>
@@ -981,19 +1052,34 @@ Total living area
 
 <br>
 
-
 #### 6.7 Summary of Results and Hypothesis 
-
-
-
+Under construction, could be eliminated.
 
 <br><br>
 
 ### 7. Discussion
+Under construction
+
+Note: Provide an outlook of the future developments of the particular scientific discussion, discuss policy implications and point out open questions.
 
 <br><br>
 
 ### 8. Conclusion
+Under construction
+
+The primary objective of this thesis is to understand the economic impact the Covid-19 crisis had on housing prices and how these socioeconomic impacts changed the relative demand for certain hedonic features of a home. The XGBoost machine learning model ranked the 
+
+What the thesis is about
+
+
+
+What methods I used to get results
+results
+conclusion of those results
+Connection
+Call to action
+
+
 
 <br><br>
 
@@ -1005,38 +1091,13 @@ Total living area
 
 <br><br>
 
-#### General Notes and Todos
- 
- * Possibly write in LaTex?
- * Just write cover letter in word and combine PDF?
- * Complete general Structure
- * Select system for managing references
- * Get confirmation on title change from Prüfungsamt
- * Possible additional data
-   + Include Covid cases in La by date?
-   + Crime stats?
-   + Racial Stats?
- * Include the terms
-   + Big Data
- * Build some graphics in pptx and import them as images
- * Web scrapping for additional data sets?
- * Graph with **DATE** as variable
- * Make German study in German
- * Replicate with other data sets
- * Check for plagiarism 
- * Make video explaining thesis for prof. grading
+
+
+
 
 #### Helpful Notes
 
-1. Define the central concepts used early on
-2. Start each chapter with a small introduction and end it with a brief summary of results
-3. Provide an outlook of the future developments of the particular scientific discussion, discuss policy implications and point out open questions.
 
-#### Playground
-
-```{r}
-
-```
 
 
 <br><br><br>
