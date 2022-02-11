@@ -1404,7 +1404,7 @@ tab_model(lm_corona_dom_bottom,
 ###### 2.7.1 Visualization
 ```{r, alpha = false}
 
-# Distribution: Total 
+# 1. Distribution: Total 
 ggplot(data = data_factor, aes(x = sold_price)) +
     geom_density(mapping = aes(fill = low, alpha = 0.5, position = "identity")) +
     ggtitle("Price Distributions of All Properties") +
@@ -1414,8 +1414,7 @@ ggplot(data = data_factor, aes(x = sold_price)) +
     scale_fill_manual(values = c(very_low))
 
 # Distribution: City vs non-city
-
-# Conditional Mean: City vs Rural
+# 2. Conditional Mean: City vs Rural
 library(plyr)
 city_limits_mean_data <- ddply(data_factor, "city_limits", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
 
@@ -1433,23 +1432,52 @@ ggplot(data = data_factor, aes(x = sold_price, fill = city_limits)) +
 
 # Conditional Mean: City pre vs post corona
 library(plyr)
-city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits ==1 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits == 1 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
 
 # Distribution: Just City
 
 # Conditional Mean: City pre vs post corona
 library(plyr)
-city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits ==1 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits == 1 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
 
-ggplot(data = subset(data_factor, data_factor$city_limits ==1), aes(x = sold_price)) +
+ggplot(data = subset(data_factor, data_factor$city_limits == 1), aes(x = sold_price)) +
+    geom_density(alpha = 0.5, position = "identity", fill = very_low) +
+    ggtitle("Price Distribution of Properties Not in City Limits") +
+    geom_vline(aes(xintercept = mean(city_limits)), linetype="dashed", size= 0.4, alpha = 0.5) +
+    xlab("Sold Price") +
+    ylab("Density")
+
+# Distribution: Infection: City
+ggplot(data = subset(data_factor, data_factor$city_limits == 1), aes(x = sold_price, fill = infections_period)) +
+    geom_density(alpha = 0.5, position = "identity") +
+    ggtitle("Price Distributions of Properties Not in City Limits") +
+    geom_vline(data = city_limits_mean_data, aes(xintercept = city_limits_mean_data[2,2]), linetype="dashed", size= 0.5, color = med, alpha = 0.8) +
+    geom_vline(data = city_limits_mean_data, aes(xintercept = city_limits_mean_data[1,2]), linetype="dashed", size= 0.5, alpha = 0.8, color = very_low) +
+    scale_fill_manual(values = c(very_low, med), 
+                      name = "Infection Period",
+                      labels = c()) +
+    xlab("Sold Price") +
+    ylab("Density") 
+
+# Conditional Mean: Rural pre vs post corona
+library(plyr)
+city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits == 0 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+
+# Distribution: Just City
+
+# Conditional Mean: City pre vs post corona
+library(plyr)
+city_limits_mean_data <- ddply(subset(data_factor, data_factor$city_limits == 0 ), "infections_period", summarise, city_limits_mean = mean(sold_price, na.rm = TRUE))
+
+ggplot(data = subset(data_factor, data_factor$city_limits == 0), aes(x = sold_price)) +
     geom_density(alpha = 0.5, position = "identity", fill = very_low) +
     ggtitle("Price Distribution of Properties in City Limits") +
     geom_vline(aes(xintercept = mean(city_limits)), linetype="dashed", size= 0.4, alpha = 0.5) +
     xlab("Sold Price") +
     ylab("Density")
 
-# Distribution: Infection
-ggplot(data = subset(data_factor, data_factor$city_limits ==1), aes(x = sold_price, fill = infections_period)) +
+# Distribution: Infection: Rural
+ggplot(data = subset(data_factor, data_factor$city_limits == 0), aes(x = sold_price, fill = infections_period)) +
     geom_density(alpha = 0.5, position = "identity") +
     ggtitle("Price Distributions of Properties in City Limits") +
     geom_vline(data = city_limits_mean_data, aes(xintercept = city_limits_mean_data[2,2]), linetype="dashed", size= 0.5, color = med, alpha = 0.8) +
@@ -1503,6 +1531,72 @@ tab_model(lm_corona_city,
                     "data_factor$infections_3mma:data_factor$city_limits1"))
 
 
+# Testing Corona, Rural vs City General
+
+
+# City Limits ----------------------------------------------------------------
+
+#Creating split data sets
+
+# Add 3mma
+data_factor_core_clean$infections_3mma <- data_factor$infections_3mma
+
+# Add city limits
+data_factor_core_clean$city_limits <- data_factor$city_limits
+
+# split by city limit
+data_city_test <- subset(data_factor_core_clean, data_factor_core_clean$city_limits == 1)
+
+# Remove city limit
+data_city_test <- subset(data_city_test, select = -c(city_limits)) 
+
+
+lm_corona_city_gen <- lm(sold_price ~ . 
+               
+                       # test variable(s)                    
+                       + infections_3mma
+                       
+                       
+                       ,data_city_test)
+coeftest(lm_corona_city_gen, vcov = vcovHC(lm_corona_city_gen, method = "White2", type = "HC0"))
+
+# Table output
+tab_model(lm_corona_city_gen, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "infections_3mma"))
+
+# Rural ----------------------------------------------------------------
+
+# Add 3mma
+data_factor_core_clean$infections_3mma <- data_factor$infections_3mma
+
+# Add city limits
+data_factor_core_clean$city_limits <- data_factor$city_limits
+
+# split by city limit
+data_city_test <- subset(data_factor_core_clean, data_factor_core_clean$city_limits == 0)
+
+# Remove city limit
+data_city_test <- subset(data_city_test, select = -c(city_limits)) 
+
+lm_corona_city_rural <- lm(sold_price ~ . 
+               
+                       # test variable(s)                    
+                       + infections_3mma
+                       
+                       
+                       ,data = data_city_test)
+coeftest(lm_corona_city_rural, vcov = vcovHC(lm_corona_city_rural, method = "White2", type = "HC0"))
+# Table output
+tab_model(lm_corona_city_rural, 
+          auto.label = TRUE, 
+          collapse.ci = TRUE,
+          terms = c("(Intercept)",
+                    "infections_3mma"))
+
+
 ```
 
 <br><br>
@@ -1527,21 +1621,6 @@ attach(data_index_gdp)
 data_index_fred_1975_total <- read_excel("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Models/Data/New Data/Total_US_1975.xls")
 attach(data_index_fred_1975_total)
 
-# GDP and Housing Prices
-ggplot(data_index_fred_1975_total, aes(x = date)) + 
-    geom_line(aes(y = gdp_pc_nom_index_1975), color = "darkred") +
-    geom_line(aes(y = re), color = "darkred") +
-    theme_minimal() +
-    geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
-    #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
-    scale_y_continuous(limits = c(min(index_Q1_1980),max(index_Q1_1980))) +
-    xlab(" ") +
-    ylab("Index Value") +
-    labs(title = "Louisiana Housing Index: FRED St. Louis",
-         caption = "") 
-
-
-
 # Index graphing
 ggplot(data_index, aes(x = Date)) +
     geom_line(mapping = aes(y = lma_2m_index), color = high) +
@@ -1552,9 +1631,9 @@ ggplot(data_index, aes(x = Date)) +
     #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
     scale_y_continuous(limits = c(min(lma_2m_index),max(lma_2m_index))) +
     xlab(" ") +
-    ylab("Weighted Average Price per Sqft.") +
+    ylab("Index Value") +
     labs(title = "Louisiana Housing Index",
-         caption = "") 
+         caption = "Weighted Average Price per Sqft.") 
 
 # FRED quarterly data
 ggplot(data_index_fred, aes(x = date)) + 
@@ -1571,8 +1650,8 @@ ggplot(data_index_fred, aes(x = date)) +
 # La Real GDP data quarterly data
 data_index_gdp <- subset(data_index_gdp, data_index_gdp$date >= as.Date("2011-07-01"))
 ggplot(data_index_gdp, aes(x = date)) + 
-    geom_line(aes(y = real_gdp_Index, color = "darkred"), linetype = "dashed", size = .5) +
-    geom_line(aes(y = real_gdp_re_specific_index, color = "darkblue"), size = .5) +
+    geom_line(aes(y = real_gdp_Index), color = very_low, linetype = "dashed", size = .5) +
+    geom_line(aes(y = real_gdp_re_specific_index), color = med, size = .5) +
     theme(legend.position = "bottom") +
     geom_vline(xintercept = as.Date("2020-01-01"), linetype = 4, color = "green") +
     #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
@@ -1587,27 +1666,27 @@ ggplot(data_index_gdp, aes(x = date)) +
 cor.test(real_gdp_Index, real_gdp_re_specific_index)
 
 # TOTAL US Real GDP data quarterly data base 2011
-ggplot(data_index_fred_total, aes(x = observation_date)) + 
-    geom_line(aes(y = GDP, color = very_low), linetype = "dashed", size = .5) +
-    geom_line(aes(y = all_re_index, color = med), size = .5) +
-    theme(legend.position = "bottom" ) +
-    geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
+#ggplot(data_index_fred_total, aes(x = observation_date)) + 
+#    geom_line(aes(y = GDP, color = very_low), linetype = "dashed", size = .5) +
+#    geom_line(aes(y = all_re_index, color = med), size = .5) +
+#    theme(legend.position = "bottom" ) +
+#    geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
     #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
     #scale_y_continuous(limits = c(min(real_gdp_Index),max(real_gdp_Index))) +
-    xlab(" ") +
-    ylab("Index Value") +
-    labs(title = "Total US GDP and Housing Index: FRED St. Louis",
-         caption = "") +
-         scale_color_discrete(name = "Infection Period",
-                              labels = c("RE Index", "Aggrigate GDP Index"))
+#    xlab(" ") +
+#    ylab("Index Value") +
+#    labs(title = "Total US GDP and Housing Index: FRED St. Louis",
+#         caption = "") +
+#         scale_color_discrete(name = "Infection Period",
+#                              labels = c("RE Index", "Aggrigate GDP Index"))
   
                     
 # TOTAL US Real GDP data quarterly data base 1975
 
 # Nominal
 ggplot(data_index_fred_1975_total, aes(x = date)) + 
-    geom_line(aes(y = gdp_pc_nom_index_1975 , color = very_low), linetype = "dashed", size = .5) +
-    geom_line(aes(y = re_nom_index_1975, color = med), size = .5) +
+    geom_line(aes(y = gdp_pc_nom_index_1975), color = low, linetype = "dashed", size = .5) +
+    geom_line(aes(y = re_nom_index_1975), color = med, size = .5) +
     theme(legend.position = "bottom" ) +
     #geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
     #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
@@ -1624,8 +1703,8 @@ corr_nom_1975 <- cor(gdp_pc_nom_index_1975, re_nom_index_1975)
 
 # Real
 ggplot(data_index_fred_1975_total, aes(x = date)) + 
-    geom_line(aes(y = gdp_pc_real_index_1975 , color = very_low), linetype = "dashed", size = .5) +
-    geom_line(aes(y = re_real_index_1975, color = med), size = .5) +
+    geom_line(aes(y = gdp_pc_real_index_1975), color = very_low, linetype = "dashed", size = .5) +
+    geom_line(aes(y = re_real_index_1975), color = med , size = .5) +
     theme(legend.position = "bottom" ) +
     #geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
     #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
@@ -1892,13 +1971,13 @@ tab_model(lm_ucla)
 library(cowplot)
 library(ggplot2)
 
-p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/var_list_1.png", scale = 1)
+p1 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/dist_city.png", scale = 0.985)
 
-p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Var_list_2.png", scale = 1)
+p2 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/dist_city_corona.png", scale = 1)
 
-p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/area_price_nonlin.png", scale = 0.90)
+p3 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/dist_rural.png", scale = 0.90)
 
-p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Nonlinearities/living_area_non_lin_ols.png", scale = 0.90)
+p4 <- ggdraw() + draw_image("/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Results/City/dist_rural_corona.png", scale = 0.90)
 
 plot_grid(p1, p2)
 plot_grid(p3, p4)
@@ -1939,11 +2018,7 @@ table2
 
 ```
 
-<center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
-</center>
 
-<br>
 
 ```{r echo=FALSE, results='asis'}
 # Cleaned Data Set Summary
