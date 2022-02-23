@@ -60,6 +60,8 @@ data_gbm_clean$sold_date <- openxlsx::convertToDate(data_gbm_clean$sold_date)
 data_gbm_clean$sold_date <- as.numeric(data_gbm_clean$sold_date)
 str(data_gbm_clean)
 
+
+
 # Splits
 data_gbm_clean$city_limits <- as.factor(data_gbm_clean$city_limits)
 data_gbm_clean$corona_date_split <- as.factor(data_gbm_clean$corona_date_split)
@@ -497,7 +499,7 @@ pdp_heat_con <- xgb.fit.final %>%
 infections_3d <- pdp_heat_con$data$infections_3mma
 dom_3d <- pdp_heat_con$data$dom
 yhat_3d <- pdp_heat_con$data$yhat
-pdp_mat <- data.frame(infections_3d, dom_3d, yhat_3d) # Datafram for plotly 3D model
+pdp_mat <- data.frame(infections_3d, dom_3d, yhat_3d) # Dataframe for plotly 3D model
 
 # Axis Titles
 axx <- list(title = "Infections Daily")
