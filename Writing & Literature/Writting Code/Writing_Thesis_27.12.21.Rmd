@@ -4,11 +4,11 @@ title: An Emperical Economic Investigation into COVID-19's Impact on Fundemental
 author: "Sawyer M. Benson"
 date: "December 21, 2021"
 output:
-  word_document: default
+  html_notebook: default
   html_document:
     df_print: paged
   pdf_document: default
-  html_notebook: default
+  word_document: default
 bibliography: library.bib
 link-citations: yes
 ---
@@ -508,7 +508,7 @@ $${\displaystyle {\hat {h}}_{m}(x_{i})=\left[{\frac {\partial ^{2}L(y_{i},f(x_{i
 
 <br>
 
-2.2.2 Fit an original weak learner (e.g. shallow tree) using the training set ${\displaystyle \displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the following optimization problem:
+2.2.2 Fit an original weak learner (e.g. shallow tree) using the training set ${\displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the following optimization problem:
 
 $${\displaystyle {\hat {\phi }}_{m}={\underset {\phi \in \mathbf {\Phi } }{\arg \min }}\sum _{i=1}^{N}{\frac {1}{2}}{\hat {h}}_{m}(x_{i})\left[-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}-\phi (x_{i})\right]^{2}}$$
 
