@@ -1684,17 +1684,21 @@ cor.test(real_gdp_Index, real_gdp_re_specific_index)
 # TOTAL US Real GDP data quarterly data base 1975
 
 # Nominal
-ggplot(data_index_fred_1975_total, aes(x = date)) + 
-    geom_line(aes(y = gdp_pc_nom_index_1975), color = low, linetype = "dashed", size = .5) +
-    geom_line(aes(y = re_nom_index_1975), color = med, size = .5) +
+ggplot() + 
+    geom_line(data_index_fred_1975_total,
+              mapping = aes(x = date, 
+                            y = gdp_pc_nom_index_1975), 
+                            color = low, 
+                            linetype = "dashed", 
+                            size = .5) +
+    geom_line(data_index_fred_1975_total,
+              mapping = aes(x = date, y = re_nom_index_1975), 
+              color = med, size = .5) +
     theme(legend.position = "bottom" ) +
-    #geom_vline(xintercept = as.Date("2020-01-01"), linetype=4, color = "green") +
-    #scale_x_date(limits = as.Date(c("2020-01-01", "2021-12-31"))) +
-    #scale_y_continuous(limits = c(min(real_gdp_Index),max(real_gdp_Index))) +
     xlab(" ") +
     ylab("Index Value (1975 Q1 = 100)") +
     labs(title = "U.S. GDP and Housing Index",
-         caption = "FRED, St. Louis") +
+         caption = "FRED, St. Louis: GDP in Blue, Real Estate index in Green") +
          scale_color_discrete(name = "",
                               labels = c("Nominal Housing Prices", "Nominal GDP Per-Capita"))
 
@@ -1712,7 +1716,7 @@ ggplot(data_index_fred_1975_total, aes(x = date)) +
     xlab(" ") +
     ylab("Index Value (1975 Q1 = 100)") +
     labs(title = "U.S. GDP and Housing Index",
-         caption = "FRED, St. Louis") +
+         caption = "FRED, St. Louis: GDP in Blue, Real Estate index in Green") +
          scale_color_discrete(name = "",
                               labels = c("Real Housing Prices", "Real GDP Per-Capita"))
 

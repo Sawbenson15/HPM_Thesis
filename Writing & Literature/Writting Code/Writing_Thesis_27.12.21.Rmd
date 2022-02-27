@@ -1,24 +1,23 @@
 ---
 title: An Emperical Economic Investigation into COVID-19's Impact on Fundemental Hedonic
-  Features in Real Estate Valuation Models
+  Features in Real Estate Valuation Models Using Machine Learning Methods
 author: "Sawyer M. Benson"
 date: "December 21, 2021"
 output:
-  html_notebook: default
+  word_document: default
   html_document:
     df_print: paged
   pdf_document: default
-  word_document: default
+  html_notebook: default
 bibliography: library.bib
 link-citations: yes
 ---
-
 
 <br><br>
 
 ### Check List
 
-* Lable tables and graphics
+* Label tables and graphics
 * Make relationship to Louisiana clear
 * Use one person (I, or me, or we)
 * Check section numbering
@@ -38,7 +37,7 @@ Under construction
 ### Abstract
 Under construction
 
-The purpose of this thesis is to understand the economic impact the Covid-19 crisis had on housing prices and how these impacts changed the relative demand of homeowners for certain hedonic features of a home using Louisiana, USA market data. To determine which variables would be important to analyze, an *eXtreme Gradient Boost* (XGBoost) machine learning algorithm was trained on a large (i.e. $104\times24412$) dataset of hedonic features. An analysis of the XGBoost's variable-importance ranking shows that number of bedrooms, city centrality, total living area, age, and days on the market were among the top most important variables in determine a homes market price. Therefore, a deeper dive into how the crisis impacted the relative demand for these features is critically important in understanding the bigger picture of Covid-19's impact on the housing market.
+The purpose of this thesis is to understand the economic impact the Covid-19 crisis had on housing prices and how these impacts changed the relative demand of homeowners for certain hedonic features of a home. To determine which variables would be important to analyze, an *eXtreme Gradient Boost* (XGBoost) machine learning algorithm was trained on a large (i.e. $104\times24412$) dataset of hedonic features from Louisiana, USA market data. An analysis of the XGBoost's variable-importance ranking shows that number of bedrooms, city centrality, total living area, age, and days on the market were among the top most important variables in determine a homes market price. Therefore, a deeper dive into how the crisis impacted the relative demand for these features is critically important in understanding the bigger picture of Covid-19's impact on the housing market.
 
 A panel of analysis shows that Covid-19, measured by the daily 3-month moving average of official infections at the time of sale, significantly increased average home prices by *8.97 USD* per additional daily infection. This finding establishes the corona-specific reaction of housing market prices to daily infections. When analyzing how this price shift is explained by specific demand for certain property characteristics, I find: the premiums for each level of number of bedrooms is significantly increased in response to daily infections, with an average increase of *32, 37, 27, and 47 USD* per additional daily infection for levels 2-through-5 bedrooms respectively; the premimum for being central to a city increased by *5.17 USD* per daily infection while properties located outside the city were not significantly impacted by daily infections; premiums for home size increased by *0.02 USD* per daily infection, with the premium for the smallest homes being significantly decreased by *3.15 USD* per daily infection; premiums for property age, which are historically negative, decreased even further with the penalty for each additional year of age increasing by *0.06 USD* per daily infections with the oldest homes experiencing the largest loss of *2.75 USD* per daily infection, per year of age and; an increase in the penalty for each additional day a home sits on the market of *0.04 USD* per daily infection with homes sitting the longest period of time on the market experiencing the largest loss of *2.75* per daily infection, per day.
 
@@ -65,19 +64,13 @@ Under construction
 
 ### 1. Introduction
 
-In late 2019, a virus first detected in Wuhan, China would set in motion a global pandemic which, by the end of 2021, will have
-killed 4.3 million people, infecting 238 million others, and disrupting the global economy across virtually every measurable
-dimension [@WHODeath]. According to seven economic impact models constructed by @McKibbin, estimates of the total global economic
-loss in terms of GDP are measured to be as large as 9.2 trillion U.S. dollars. However, despite a generally positive correlation between GDP and real estate prices *(see image 1)*, historically measured as high as 98%, real estate market prices in the U.S. hit near-record heights following the outbreak of COVID-19 [@AsiaGreen]. According to a report released by Zillow
-Analytics [@Manhertz], U.S. real estate gained 2.5 trillion dollars of value in 2020 alone, representing the largest single-year
-growth since 2005, despite an approximately 760 billion dollar decrease in GDP in the same year [@FRED2021]. The focus of this
-thesis is to investigate the reasons behind why and how real estate market prices have broken trend and behaved so
-uncharacteristically counter cyclical in the face of a global pandemic.
+In late 2019, a virus first detected in Wuhan, China would set in motion a global pandemic which, by the end of 2021, will have killed 4.3 million people, infecting 238 million others, and disrupting the global economy across virtually every measurable dimension [@WHODeath]. According to seven economic impact models constructed by @McKibbin, estimates of the total global economic loss in terms of GDP are measured to be as large as 9.2 trillion USD. However, despite a generally positive correlation between GDP and real estate prices (see figure 1), historically measured as high as 98%, real estate market prices in the US hit near-record heights following the outbreak of COVID-19 [@AsiaGreen]. According to a report released by Zillow Analytics [@Manhertz], U.S. real estate gained 2.5 trillion dollars of value in 2020 alone, representing the largest single-year growth since 2005, despite an approximately 760 billion dollar decrease in GDP in the same year [@FRED2021]. The focus of this thesis is to investigate the reasons behind why and how real estate market prices have broken trend and behaved so uncharacteristically counter cyclical in the face of a global pandemic.
 
 <br>
 
+***Figure 1***
 <center>
-![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/gdp_gen.png){width=70%}
+![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/GDP_Housing_Nominal.png){width=70%}
 </center>
 
 <br>
@@ -90,17 +83,7 @@ In the following sections, I will apply the Hedonic Pricing Method (HPM) to Loui
 
 #### 2.1 Background
 
-The market value of a commodity is most often theoretically defined as the equilibrium price derived from the basic economic
-principal, or law, of supply and demand [@Locke; @Epple]. However, the real estate market often violates this assumption due to
-its unique characteristics as an asset class [@Wheaton]. For example, much of the underlying utility of a property is its use as a means of shelter
-by its owner [@Ling]. This rather unusual relationship to this asset introduces several behavioral biases which cause economic
-frictions not accounted for by traditional neoclassical economic theory [@Nicolaides]. A notable example of behavioral bias impacting real estate price dynamics is the endowment effect. This behavioral finding was originally established by
-@Kahneman in the late 20th century, and later applied to real estate markets by @BAO. The latter of the two stating that the predictably
-irrational behavior of market participants to overvalue their home due to sentimental attachment to the property forces market prices into sustained economic disequilibrium. Other highly cited and unusual characteristics are that real
-estate assets are very infrequently traded due to high transaction costs [@Collett; @Guilkey], governments tend to interfere, both
-directly and indirectly with real estate markets through the creation of fiscal and monetary policies [@Bingyang; @Du], and through
-creating renter-protections laws such as 'squatter's rights' laws which allow a renter to remain in a home for extended
-periods of time long after they have stopped paying rent [@Hoy; @Gardiner].
+The market value of a commodity is most often theoretically defined as the equilibrium price derived from the basic economic principal, or law, of supply and demand [@Locke; @Epple]. However, the real estate market often violates this assumption due to its unique characteristics as an asset class [@Wheaton]. For example, much of the underlying utility of a property is its use as a means of shelter by its owner [@Ling]. This rather unusual relationship to this asset introduces several behavioral biases which cause economic frictions not accounted for by traditional neoclassical economic theory [@Nicolaides]. A notable example of behavioral bias impacting real estate price dynamics is the endowment effect. This behavioral finding was originally established by @Kahneman in the late 20th century, and later applied to real estate markets by @BAO. The latter of the two stating that the predictably irrational behavior of market participants to overvalue their home due to sentimental attachment to the property forces market prices into sustained economic disequilibrium. Other highly cited and unusual characteristics are that real estate assets are very infrequently traded due to high transaction costs [@Collett; @Guilkey], governments tend to interfere, both directly and indirectly with real estate markets through the creation of fiscal and monetary policies [@Bingyang; @Du], and through creating renter-protections laws such as 'squatter's rights' laws which allow a renter to remain in a home for extended periods of time long after they have stopped paying rent [@Hoy; @Gardiner].
 
 #### 2.2 Real Estate Valuation Methods
 
@@ -111,10 +94,7 @@ The idiosyncratic asset features outlined in section 2.1 along with a high level
 
 First applied in 1939 on automobile data, according to @Goodman, the HPM is a model which estimates the value of distinct characteristics of a commodity which directly or indirectly contribute to its market value. Besides its implementation in real estate finance and economics, such as in this thesis, this methodology has a wide range of applications such as its implementation in consumer and market research [@Holbrook; @Arnold], construction of consumer price indices [@Moulton; @Schultze], various tax assessments [@Berry; @Bernasconi], automated automobile valuation [@Crowling; @Matas], and computer sales [@Dulberger; @Wakefield].
 
-Since its introduction, the HPM has gain significant popularity among housing market and commercial real
-estate researchers. The specific real estate-based topics include, but are not limited to, the construction of housing price indices [@Gourieroux; @Wallace], the estimation and prediction of a property's market value in situations where market-transaction data is low-dimensional or non-existent
-[@LeSage], and, as in this thesis, the specific analysis of changes in the demand for specific property characteristics across time, subgroups, or
-both [@Clapp]. As the broad search for a satisfactory modeling framework focuses in on the HPM, another debate arises regarding the best functional form of this method. Traditionally utilizing the standard OLS framework [@Pace], researchers are increasingly utilizing a variety machine learning algorithms to accomplish an increasingly more refined set of findings.
+Since its introduction, the HPM has gain significant popularity among housing market and commercial real estate researchers. The specific real estate-based topics include, but are not limited to, the construction of housing price indices [@Gourieroux; @Wallace], the estimation and prediction of a property's market value in situations where market-transaction data is low-dimensional or non-existent [@LeSage], and, as in this thesis, the specific analysis of changes in the demand for specific property characteristics across time, subgroups, or both [@Clapp]. As the broad search for a satisfactory modeling framework focuses in on the HPM, another debate arises regarding the best functional form of this method. Traditionally utilizing the standard OLS framework [@Pace], researchers are increasingly utilizing a variety machine learning algorithms to accomplish an increasingly more refined set of findings.
 
 ##### 2.2.2 OLS and the Hedonic Pricing Model in Real Estate
 Unsurprisingly, regression analysis is the preferred estimation approach among real estate researchers when using HPT for price estimation. These multiple regression analysis methods are most often either an Ordinary Least Squares (OLS) regression or a Maximum Likelihood approximation of the log-likely equation derived directly from the hedonic function. Each of these estimation methods take a functionally similar path as they both estimate a vector of parameters (i.e. beta coefficients) that best fits the explanatory hedonic variables to the associated market price. They differ only by the loss function used in the identification of that best-fitted parameter vector.
@@ -128,23 +108,15 @@ where $R$ is rent or price of the property; $P$ is property related attributes; 
 
 ##### 2.2.3 Machine Learning and the Hedonic Pricing Model in Real Estate
 
-Though first introduced by @Turing under the broader umbrella term of *artificial intelligence*, the adoption of ML methods in real estate would take many years of software and hardware development, allowing or the subsequent collection of ever-larger data sets and central processing unites (CPUs) capable of processing the often extraordinary number of calculation required to produce a solution for a given algorithm [@Dutta]. The primary advantage of ML techniques are that ML algorithms learn and improve over time and across many iterations and variable combinations, while tradition statistical and econometric techniques produce static results across a single model [@Anguita].  
+Though first introduced by @Turing under the broader umbrella term of *artificial intelligence*, the adoption of ML methods in real estate would take many years of software and hardware development, allowing or the subsequent collection of ever-growing data sets and central processing unites (CPUs) capable of processing the often extraordinary number of calculation required to produce a solution for a given algorithm [@Dutta]. The primary advantage of ML techniques are that ML algorithms learn and improve over time and across many iterations and variable combinations, while tradition statistical and econometric techniques produce static results across a single model [@Anguita]. The algorithm improves across those iterations as it seeks to minimize the model's error in predicting observations not previously seen, often called *out of sample* observations. By doing this, the algorithm seeks to find the strongest general relationship between the independent variables and the dependent variable instead of seeking to minimize the error within a given sample set. This in tern results in stronger, more generalized interpretation of the findings.    
  
-@Mohd provides a thorough overview of the various applications of ML to real estate valuation methods, including the Ridge and Lasso regression techniques used in this thesis.
-
-**Work in Progress: Add more volume here. Possible addition of models?**
+@Mohd provides a thorough overview of the various applications of ML to real estate valuation methods, including the Ridge, Lasso regression techniques as well as artificial neural networks (ANN) and gradient boosting techniques used in this thesis. The author concludes that ML models out perform other standard valuation methods such as multiples and OLS valuation methods in both accuracy and strength of interpretation. The best performing of these models was a gradient boosting model, which was able to capture the often hidden layers of interaction between hedonic features.
 
 <br>
 
 #### 2.3 COVID-19 Crisis' Impact on Real Estate Markets
 
-In the wake of the COVID-19 crisis, there were several papers and articles regarding the economic impact of the global pandemic on the housing market being expeditiously publishes in virtually every major journal. In this section (2.3), I have selected the most relevant of these publications with respect to this thesis.
-
-Structural and temporal changes in the housing market using hedonic methods [@Shimizu], 
-
-Changes in housing market demand for specific property types and features [@Tajani],  
-
-Potential changes in housing preferences due to the COVID-19 pandemic and highlight the challenges for policy making [@Nanda]
+In the wake of the COVID-19 crisis, there were several papers and articles regarding the economic impact of the global pandemic on the housing market being expeditiously publishes in virtually every major journal. These papers investigate topics such as structural and temporal changes in the housing market using hedonic methods [@Shimizu], changes in housing market demand for specific property types and features [@Tajani], potential changes in housing preferences due to the COVID-19 pandemic and highlight the challenges for policy making [@Nanda]. Each of these papers result in findings which establish a statistically significant impact of COVID-19 on relative demand for certain hedonic features in each respective real estate market. Later in this thesis, I will establish a similar finding in the Louisiana housing market.
 
 <br><br>
 
@@ -178,6 +150,7 @@ Where $I$ is an indicator function with space $A$ that composes dummy variable $
 
 <br>
 
+***Table 1***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Data_table_1.png){width=40%}
 </center>
@@ -188,19 +161,19 @@ The results of the data cleaning processes cane be seen in **table 2**.
 
 <br>
 
+***Table 2***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Data_table_2.png){width=60%}
 </center>
 
 <br>
 
-
-
-
 #### 3.3 Variable List
+A list and short discription of all variables used in this thesis can be found in ***Table 3***
 
 <br>
 
+***Table 3***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Data Collectioin/Var_list_com.png){width=100%}
 </center>
@@ -212,11 +185,11 @@ The results of the data cleaning processes cane be seen in **table 2**.
 
 #### 3.3 Data Distriptive Statistics
 ##### 3.3.1 Correlation 
-
-The correlation matrix between all numeric variables shows that with exception to the variables which will have obvious correlations (e.g. sold_price and list_price, area_total and area_living, and infections figures), there are no other correlations which would cause concern.
+The correlation matrix (see ***Image 2***) between all numeric variables shows that with exception to the variables which will have obvious correlations (e.g. sold_price and list_price, area_total and area_living, and infections figures), there are no other correlations which would cause concern.
 
 <br>
 
+***Image 2***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/correlation_matrix.png){width=80%}
 </center>
@@ -224,18 +197,21 @@ The correlation matrix between all numeric variables shows that with exception t
 <br>
 
 ##### 3.3.2 Distributions of Select Variables
-As the standard descriptive characteristics of a particular variable are considered (i.e. measures of frequency, central tendency, dispersion, and position), the matrix of density plots below give us a good overview of the most relevant variables in this data set. 
+As the standard descriptive characteristics of a particular variable are considered (i.e. measures of frequency, central tendency, dispersion, and position), the matrix of density plots below (see ***Image 3***) give us a good overview of the most relevant variables in this data set. 
 
 <br>
+
+***Image 3***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/Select_var_summary.png){width=100%}
 </center>
 
 ##### 3.3.3 Price Index
-Under Construction
+To understand the general shape and historical trend of the pricing market specifically within Louisiana, I have constructed a simple weighted-average price per sqft. index (see ***Image 4***) using 1, 2, 3, and 4 month-moving averages of the entire data set. Furthermore, I show the St. Louis Federal Reserve's GDP (*green*) and price index (*purple*) for the Louisiana housing market (see ***Image 5***. Though the methods used in both indecies are not the same, which accounts for the general level differences between the two, one can see the shape of the data is fitting to the population.   
 
 <br>
 
+***Image 4***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/index_la.png){width=90%}
 </center>
@@ -243,11 +219,10 @@ Under Construction
 <br>
 <br>
 
+***Image 5***
 <center>
 ![](/Users/sawyerbenson/Documents/Master Thesis/HPM_Thesis/Writing & Literature/Graphics from pptx/gdp_la.png){width=90%}
 </center>
-
-<br>
 
 <br><br>
 
@@ -1044,7 +1019,67 @@ The heatmaps for DOM and daily infections show that properties sold at approxima
 <br>
 
 #### 6.7 Summary of Results and Hypothesis 
-Under construction, could be eliminated.
+
+##### 6.7.1 Covid-19: General Case
+> **Hypothesis I:** The Covid-19 crisis significantly increased housing prices
+>
+> **Results:**
+
+<br>
+
+##### 6.7.2 Covid-19: Premium for Bedrooms
+> **Hypothesis II:** The Covid-19 crisis significantly increased demand-premiums for every level of number of bedrooms greater than 1 
+>
+> **Results:**
+
+<br>
+
+##### 6.7.3 Covid-19: Premium for City Centrality
+> **Hypothesis III:** The Covid-19 crisis impacted properties within city limits more than those not within city limits  
+>
+> **Results:**
+
+<br>
+
+##### 6.7.4 Covid-19: Premium for Size
+
+> **Hypothesis IV:** The Covid-19 crisis increased the premium for property size 
+>
+> **Results:**
+
+<br>
+
+> **Hypothesis V:** The Covid-19 crisis impacted properties in the top 25th percentile of property size more than the bottom 25th percentile 
+>
+> **Results:**
+
+<br>
+
+##### 6.7.5 Covid-19: Premium for Age 
+
+> **Hypothesis VI:** The Covid-19 crisis decreased the premium for property age 
+>
+> **Results:**
+
+<br>
+
+> **Hypothesis VII:** The Covid-19 crisis impacted properties in the top 25th percentile of age more than the bottom 25th percentile  
+>
+> **Results:**
+
+<br>
+
+##### 6.7.6 Covid-19: Change in Days on Market
+
+> **Hypothesis VIII:** The Covid-19 crisis significantly decreased the premium for days on market 
+>
+> **Results:** 
+
+<br>
+
+> **Hypothesis IX:** The Covid-19 crisis impacted properties in the top 25th percentile of days on market more than the bottom 25th percentile 
+>
+> **Results:**
 
 <br><br>
 
