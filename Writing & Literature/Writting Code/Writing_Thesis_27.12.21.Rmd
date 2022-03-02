@@ -508,7 +508,7 @@ $${\displaystyle {\hat {h}}_{m}(x_{i})=\left[{\frac {\partial ^{2}L(y_{i},f(x_{i
 
 <br>
 
-2.2.2 Fit an original weak learner (e.g. shallow tree) using the training set ${\displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the following optimization problem:
+2.2.2 Fit an original weak learner (e.g. shallow tree) using the training set $\displaystyle \{x_{i},-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}\}_{i=1}^{N}}$ by solving the following optimization problem:
 
 $${\displaystyle {\hat {\phi }}_{m}={\underset {\phi \in \mathbf {\Phi } }{\arg \min }}\sum _{i=1}^{N}{\frac {1}{2}}{\hat {h}}_{m}(x_{i})\left[-{\frac {{\hat {g}}_{m}(x_{i})}{{\hat {h}}_{m}(x_{i})}}-\phi (x_{i})\right]^{2}}$$
 
